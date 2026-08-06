@@ -1,0 +1,135 @@
+services:
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    image: ${REGISTRY:-berserkchmonya}/web:${TAG:-latest}
+    container_name: web_dev
+    ports:
+      - "8090:80"
+    volumes:
+      - ./web/nginx-conf/default.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - appnet
+    depends_on:
+      - naorobotapi
+      - skeletonfinderapi
+      - translatorapi
+
+  team19-web:
+    build:
+      context: ./team-19-web
+      dockerfile: Dockerfile
+    image: ${REGISTRY:-berserkchmonya}/team19-web:${TAG:-latest}
+    container_name: team19_web_dev
+    ports:
+      - "3000:3000"
+    networks:
+      - appnet
+    depends_on:
+      - naorobotapi
+      - skeletonfinderapi
+      - translatorapi
+
+  naorobotapi:
+    build:
+      context: ./team-19-social-robot/naoRobotAPI
+      dockerfile: Dockerfile
+    image: ${REGISTRY:-berserkchmonya}/nao-robot-api:${TAG:-latest}
+    command: python server.py
+    container_name: naorobotapi
+    env_file: ./team-19-social-robot/.env
+    ports:
+      - "5000:5000"
+    environment:
+      HOST_PORT: ${HOST_PORT:-1234}
+      HOST_IP: ${HOST_IP:-127.0.0.1}
+      NAO_PORT: ${NAO_PORT:-9559}
+      NAO_IP: host.docker.internal
+      FLASK_ENV: development
+    networks:
+      - appnet
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  skeletonfinderapi:
+    build:
+      context: ./team-19-social-robot/skeletonFinderAPI
+      dockerfile: Dockerfile
+    image: ${REGISTRY:-berserkchmonya}/skeleton-finder-api:${TAG:-latest}
+    command: python server.py
+    container_name: skeletonfinderapi
+    env_file: ./team-19-social-robot/.env
+    ports:
+      - "6001:6001"
+    environment:
+      FLASK_ENV: development
+    volumes:
+      - /home/ubuntu/Pictures:/images:ro
+    networks:
+      - appnet
+
+  translatorapi:
+    build:
+      context: ./team-19-social-robot/translator
+      dockerfile: Dockerfile
+    image: ${REGISTRY:-berserkchmonya}/translator:${TAG:-latest}
+    command: python nao_pose_service.py
+    container_name: translatorapi
+    env_file: ./team-19-social-robot/.env
+    ports:
+      - "7000:7000"
+    environment:
+      FLASK_ENV: development
+      EXERCISE_CONFIG_URL: http://exerciseconfigservice:7001
+    volumes:
+      - /home/ubuntu/Pictures:/home/ubuntu/Pictures
+    depends_on:
+      - naorobotapi
+      - skeletonfinderapi
+      - exercise-config-service
+    networks:
+      - appnet
+
+  voicecommandapi:
+    build:
+      context: ./team-19-social-robot/voiceCommandAPI
+      dockerfile: Dockerfile
+    image: ${REGISTRY:-berserkchmonya}/voice-command-api:${TAG:-latest}
+    container_name: voicecommandapi
+    ports:
+      - "8000:8000"
+    environment:
+      FLASK_ENV: development
+      NAO_SET_POSE_URL: http://naorobotapi:5000/setting_pose/setPose
+    depends_on:
+      - naorobotapi
+    volumes:
+      - ./team-19-social-robot/voiceCommandAPI:/app
+    networks:
+      - appnet
+
+  exercise-config-service:
+    build:
+      context: ./team-19-social-robot/exerciseConfigService
+      dockerfile: Dockerfile
+    image: ${REGISTRY:-berserkchmonya}/exercise-config-service:${TAG:-latest}
+    command: python run.py
+    container_name: exerciseconfigservice
+    env_file: ./team-19-social-robot/.env
+    ports:
+      - "7001:7001"
+    environment:
+      FLASK_ENV: development
+      EXERCISES_DIR: /service/exercises
+      VOICE_COMMAND_API_URL: http://voicecommandapi:8000
+    depends_on:
+      - voicecommandapi
+    volumes:
+      - /home/ubuntu/exercises:/service/exercises
+    networks:
+      - appnet
+
+networks:
+  appnet:
+    driver: bridge

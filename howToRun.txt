@@ -1,0 +1,80 @@
+PYTHON 2.7
+cd D:\tpVideoKonverter\team-19-social-robot\naoRobotAPI
+
+"C:\Python27\python.exe" -m pip install ./compatDep/qi-1.8.3-cp27-none-win_amd64.whl
+"C:\Python27\python.exe" -m pip install ./compatDep/almath-1.6.8-cp27-none-win_amd64.whl
+"C:\Python27\python.exe" -m pip install ./compatDep/chardet-4.0.0-py2.py3-none-any.whl
+"C:\Python27\python.exe" -m pip install ./compatDep/urllib3-1.26.3-py2.py3-none-any.whl
+"C:\Python27\python.exe" -m pip install ./compatDep/idna-2.9-py2.py3-none-any.whl
+"C:\Python27\python.exe" -m pip install ./compatDep/certifi-2020.6.20-py2.py3-none-any.whl
+"C:\Python27\python.exe" -m pip install ./compatDep/requests-2.25.1-py2.py3-none-any.whl
+"C:\Python27\python.exe" -m pip install ./compatDep/gTTS-token-1.1.4.tar.gz
+"C:\Python27\python.exe" -m pip install ./compatDep/click-7.1.2-py2.py3-none-any.whl
+"C:\Python27\python.exe" -m pip install ./compatDep/six-1.15.0-py2.py3-none-any.whl
+"C:\Python27\python.exe" -m pip install ./compatDep/backports.functools_lru_cache-1.6.1-py2.py3-none-any.whl
+"C:\Python27\python.exe" -m pip install ./compatDep/soupsieve-1.9.6-py2.py3-none-any.whl
+"C:\Python27\python.exe" -m pip install ./compatDep/beautifulsoup4-4.9.3-py2-none-any.whl
+"C:\Python27\python.exe" -m pip install ./compatDep/gTTS-2.1.0-py2-none-any.whl
+"C:\Python27\python.exe" -m pip install ./compatDep/numpy-1.16.1-cp27-cp27m-win32.whl
+"C:\Python27\python.exe" -m pip install ./compatDep/python_dateutil-2.8.1-py2.py3-none-any.whl
+"C:\Python27\python.exe" -m pip install ./compatDep/pytz-2019.3-py2.py3-none-any.whl
+"C:\Python27\python.exe" -m pip install ./compatDep/pandas-0.23.3-cp27-cp27m-win_amd64.whl
+"C:\Python27\python.exe" -m pip install ./compatDep/enum34-1.1.10-py2-none-any.whl
+"C:\Python27\python.exe" -m pip install ./compatDep/pathlib-1.0.1.tar.gz
+"C:\Python27\python.exe" -m pip install ./compatDep/pyzbar-0.1.7-py2.py3-none-win_amd64.whl
+
+
+"C:\Python27\python.exe" -m pip install ./compatDep/itsdangerous-1.1.0-py2.py3-none-any.whl
+"C:\Python27\python.exe" -m pip install ./compatDep/Werkzeug-1.0.1-py2.py3-none-any.whl
+"C:\Python27\python.exe" -m pip install ./compatDep/MarkupSafe-1.1.1.tar.gz
+"C:\Python27\python.exe" -m pip install ./compatDep/Jinja2-2.11.3-py2.py3-none-any.whl
+"C:\Python27\python.exe" -m pip install ./compatDep/Flask-1.1.1-py2.py3-none-any.whl
+"C:\Python27\python.exe" -m pip install ./compatDep/Flask_Cors-3.0.3-py2.py3-none-any.whl
+"C:\Python27\python.exe" -m pip install ./compatDep/typing-3.10.0.0-py2-none-any.whl
+"C:\Python27\python.exe" -m pip install ./compatDep/python_dotenv-0.17.1-py2.py3-none-any.whl
+"C:\Python27\python.exe" -m pip install ./compatDep/dotenv-0.9.9-py2.py3-none-any.whl
+
+
+FRONTEND
+cd D:\tpVideoKonverter\web
+npm run build
+npm run dev
+
+
+VIDEO SERVICE - 
+"./.venv/Scripts/python.exe" -m pip install -r requirements.tx
+
+TRANSLATOR
+cd D:\tpVideoKonverter\team-19-social-robot\translator
+"D:/tpVideoKonverter/team-19-social-robot/skeletonFinderAPI/.venv/Scripts/python.exe" nao_pose_service.py
+
+
+POSE SERVICE
+cd D:\tpVideoKonverter\team-19-social-robot\translator
+"D:/tpVideoKonverter/team-19-social-robot/skeletonFinderAPI/.venv/Scripts/python.exe" D:\tpVideoKonverter\team-19-social-robot\skeletonFinderAPI\server\server.py
+
+BASE APP
+"C:\Python27\python.exe" D:\tpVideoKonverter\team-19-social-robot\naoRobotAPI\server.py
+
+cd D:\tpVideoKonverter\team-19-social-robot\exerciseConfigService
+"D:/tpVideoKonverter/team-19-social-robot/skeletonFinderAPI/.venv/Scripts/python.exe" D:\tpVideoKonverter\team-19-social-robot\exerciseConfigService\run.py
+
+cd D:\tpVideoKonverter\team-19-social-robot\voiceCommandAPI
+"D:/tpVideoKonverter/team-19-social-robot/skeletonFinderAPI/.venv/Scripts/python.exe" D:\tpVideoKonverter\team-19-social-robot\voiceCommandAPI\server.py
+
+FRONTEND
+cd D:\tpVideoKonverter\web
+npm run dev
+
+TP WEB PAGE ONLY
+cd D:\tpVideoKonverter\team-19-web
+npm run dev
+
+NOTES
+https://www.youtube.com/watch?v=VAeRhmpcWEQ
+VITE https://vite.dev/guide/
+CVA https://cva.style/docs
+Part 1: https://www.youtube.com/watch?v=qGQRdCg6JRQ 
+Part 2: https://www.youtube.com/watch?v=B4aT_UO2NLU 
+Part 3: https://www.youtube.com/watch?v=Ic9vPhB-AEI
+Part 4: https://www.youtube.com/watch?v=6EGdE82Nw4M
