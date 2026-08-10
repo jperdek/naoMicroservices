@@ -18,14 +18,18 @@ import requests
 
 from arms_translator import translate_arms
 from video_pose_processor import process_video_bytes
+from flask_cors import CORS
 
 # =========================
 # CONFIG
 # =========================
 
-POSE_API_URL = "http://skeletonfinderapi:6001/media_pipe_pose/pose_from_image"
-SET_POSE_URL = "http://naorobotapi:5000/setting_pose/setPose"
-EXERCISE_CONFIG_URL = os.environ.get("EXERCISE_CONFIG_URL", "http://exerciseconfigservice:7001")
+#POSE_API_URL = "http://skeletonfinderapi:6001/media_pipe_pose/pose_from_image"
+#SET_POSE_URL = "http://naorobotapi:5000/setting_pose/setPose"
+POSE_API_URL = "http://localhost:6001/media_pipe_pose/pose_from_image"
+SET_POSE_URL = "http://localhost:5000/setting_pose/setPose"
+#EXERCISE_CONFIG_URL = os.environ.get("EXERCISE_CONFIG_URL", "http://exerciseconfigservice:7001")
+EXERCISE_CONFIG_URL = os.environ.get("EXERCISE_CONFIG_URL", "http://localhost:7001")
 
 # Host directory mounted into pose container as /images
 POSE_HOST_ROOT = "/home/ubuntu/Pictures"      # host/VM path
@@ -41,7 +45,7 @@ VIDEO_FRAMES_ROOT = os.path.join(POSE_HOST_ROOT, "nao_video_frames")
 os.makedirs(VIDEO_FRAMES_ROOT, exist_ok=True)
 
 app = Flask(__name__)
-
+CORS(app) #added
 
 # =========================
 # HELPERS

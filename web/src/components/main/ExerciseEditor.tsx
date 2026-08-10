@@ -34,10 +34,11 @@ const POSE_DISPLAY_SK: Record<string, string> = {
   point_left:  "Ukáž vľavo",
 };
 
+const LOCAL = true; //when nginx is use change to false
 // ── API config ────────────────────────────────────────────────────
-const UPLOAD_API = "";
-const EDITOR_API = "";
-const POSES_API  = "";
+const UPLOAD_API = LOCAL? "http://localhost:7000" : ""; //empty for reverse proxy nginx
+const EDITOR_API = LOCAL? "http://localhost:7001" : "";
+const POSES_API  = LOCAL? "http://localhost:8000" : "";
 const LLM_API_BASE = import.meta.env.VITE_LLM_API_BASE ?? "https://litellm.blockfinlab.xyz";
 const LLM_API_KEY  = import.meta.env.VITE_LLM_API_KEY ?? "";
 const LLM_MODEL    = "gpt-5.4-fiit";

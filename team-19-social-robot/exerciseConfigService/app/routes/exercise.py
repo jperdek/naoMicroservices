@@ -22,7 +22,8 @@ from app.storage import (
     get_frame_image,
 )
 
-VOICE_COMMAND_API_URL = os.environ.get("VOICE_COMMAND_API_URL", "http://voicecommandapi:8000")
+#VOICE_COMMAND_API_URL = os.environ.get("VOICE_COMMAND_API_URL", "http://voicecommandapi:8000")
+VOICE_COMMAND_API_URL = os.environ.get("VOICE_COMMAND_API_URL", "http://localhost:8000")
 
 exercise_bp = Blueprint("exercise", __name__, url_prefix="/exercise")
 

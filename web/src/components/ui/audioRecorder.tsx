@@ -47,7 +47,8 @@ export function AudioRecorderComponent() {
             console.log("Nothing to merge. Provide at least two sound inputs!");
             return;
         }
-
+        console.log("Merging....");
+        console.log(inputList.length);
         const audioContext = new AudioContext();
         let concatenatedBuffer = null;
         let inputElement = null;
