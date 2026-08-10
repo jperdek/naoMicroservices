@@ -21,10 +21,14 @@ from app.storage import (
     save_frame_image,
     get_frame_image,
 )
+from dotenv import load_dotenv
 
-#VOICE_COMMAND_API_URL = os.environ.get("VOICE_COMMAND_API_URL", "http://voicecommandapi:8000")
-VOICE_COMMAND_API_URL = os.environ.get("VOICE_COMMAND_API_URL", "http://localhost:8000")
-
+load_dotenv()
+LOCAL = os.environ.get('LOCAL', True)
+if LOCAL:
+    VOICE_COMMAND_API_URL = os.environ.get("VOICE_COMMAND_API_URL", "http://localhost:8000")
+else:
+    VOICE_COMMAND_API_URL = os.environ.get("VOICE_COMMAND_API_URL", "http://voicecommandapi:8000")
 exercise_bp = Blueprint("exercise", __name__, url_prefix="/exercise")
 
 

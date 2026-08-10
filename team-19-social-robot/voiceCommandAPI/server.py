@@ -17,16 +17,23 @@ from flask import Flask, request, jsonify, send_from_directory
 import flask_cors
 
 from pose_registry import resolve, list_commands
+from dotenv import load_dotenv
 
-#NAO_SET_POSE_URL = os.environ.get(
-#    "NAO_SET_POSE_URL",
-#    "http://naorobotapi:5000/setting_pose/setPose",
-#)
+load_dotenv()
 
-NAO_SET_POSE_URL = os.environ.get(
-    "NAO_SET_POSE_URL",
-    "http://localhost:5000/setting_pose/setPose",
-)
+LOCAL = os.environ.get('LOCAL', True)
+if LOCAL:
+    NAO_SET_POSE_URL = os.environ.get(
+        "NAO_SET_POSE_URL",
+        "http://localhost:5000/setting_pose/setPose",
+    )
+else:
+    NAO_SET_POSE_URL = os.environ.get(
+        "NAO_SET_POSE_URL",
+        "http://naorobotapi:5000/setting_pose/setPose",
+    )
+
+
 
 IMAGES_DIR = os.path.join(os.path.dirname(__file__), "images")
 

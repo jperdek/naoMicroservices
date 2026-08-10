@@ -19,17 +19,24 @@ import requests
 from arms_translator import translate_arms
 from video_pose_processor import process_video_bytes
 from flask_cors import CORS
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 # =========================
 # CONFIG
 # =========================
 
-#POSE_API_URL = "http://skeletonfinderapi:6001/media_pipe_pose/pose_from_image"
-#SET_POSE_URL = "http://naorobotapi:5000/setting_pose/setPose"
-POSE_API_URL = "http://localhost:6001/media_pipe_pose/pose_from_image"
-SET_POSE_URL = "http://localhost:5000/setting_pose/setPose"
-#EXERCISE_CONFIG_URL = os.environ.get("EXERCISE_CONFIG_URL", "http://exerciseconfigservice:7001")
-EXERCISE_CONFIG_URL = os.environ.get("EXERCISE_CONFIG_URL", "http://localhost:7001")
+LOCAL = os.environ.get('LOCAL', True)
+if LOCAL:
+    POSE_API_URL = "http://localhost:6001/media_pipe_pose/pose_from_image"
+    SET_POSE_URL = "http://localhost:5000/setting_pose/setPose"
+    EXERCISE_CONFIG_URL = os.environ.get("EXERCISE_CONFIG_URL", "http://localhost:7001")
+else:
+    POSE_API_URL = "http://skeletonfinderapi:6001/media_pipe_pose/pose_from_image"
+    SET_POSE_URL = "http://naorobotapi:5000/setting_pose/setPose"
+    EXERCISE_CONFIG_URL = os.environ.get("EXERCISE_CONFIG_URL", "http://exerciseconfigservice:7001")
 
 # Host directory mounted into pose container as /images
 POSE_HOST_ROOT = "/home/ubuntu/Pictures"      # host/VM path
