@@ -1,10 +1,18 @@
 import { useRef, useState, useEffect } from 'react';
 import { audioBufferToWebMBlob } from "./webmAudio";
+import { standardButtonColor, standardButtonHeight, secondaryButtonColor} from "@/components/styles/styles";
 
-export function CustomAudioPlayer(props) {
+const LOCAL = true; 
+// ── API config ────────────────────────────────────────────────────
+const TO_TEXT_API = LOCAL? "http://localhost:9901" : "";
+
+
+export function CustomAudioPlayer({url, key, blob,
+                            overallRecordedMessage, onOverallRecordedMessageChange}) {
   const playerRef = useRef<any>(null);
   const [duration, setDuration] = useState(0.0);
-  const [audioPlayer, setAudioPlayer] = useState({"url": props.url,"blob": props.blob});
+  const [audioPlayer, setAudioPlayer] = useState({"url": url,"blob": blob});
+  const [textAreaText, setTextAreaText] = useState("Text to be said by NAO. Possibly loaded from video.");
 
   useEffect((): string => {
     async function endTime(blob) {
@@ -16,8 +24,8 @@ export function CustomAudioPlayer(props) {
       setDuration(result.duration);
       return result.duration.toString();
     }
-    endTime(props.blob);
-  }, [props.blob, duration]);
+    endTime(blob);
+  }, [blob, duration]);
 
   useEffect(() => {
     if (playerRef.current) {
@@ -87,7 +95,7 @@ export function CustomAudioPlayer(props) {
       const startInterval = formData.get("startInterval");
       const endInterval = formData.get("endInterval");
 
-      props.blob.arrayBuffer()
+      blob.arrayBuffer()
           .then((arrayBuffer) => {
               const audioCtx = new AudioContext();
               clipAudioBufferInWebmFormat(audioCtx, arrayBuffer, startInterval, endInterval).then(
@@ -111,24 +119,69 @@ export function CustomAudioPlayer(props) {
           });
   }
 
-  console.log(props);
- 
+ const extractFromVideo = async () => {
+      const audioBlob = audioPlayer.blob;
+      const audioFile = await fetch(audioPlayer.url);
+      const reader = new FileReader();
+      reader.readAsDataURL(audioBlob);
+      reader.onloadend = async () => {
+        const audioInBase64 = reader.result.replaceAll("data:audio/*;base64,","");
+        const res = await fetch(`${TO_TEXT_API}/translate/webm`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ "audio_file": audioInBase64, "language": "sk", "model": "large-v1" }),
+        });
+        if (!res.ok) throw new Error(`Upload failed: HTTP ${res.status}`);
+        const data = await res.json();
+        console.log(data);
+        const translation: string = data.translation;
+        setTextAreaText(translation);
+        const cloneDictOverallRecordedMessage = JSON.parse(JSON.stringify(overallRecordedMessage));
+        console.log(key);
+        if (key === undefined) { key = 0; }
+        cloneDictOverallRecordedMessage[key] = translation;
+        onOverallRecordedMessageChange(cloneDictOverallRecordedMessage);
+      };   
+ }
+
+
+console.log(textAreaText);
   return (
     <div>
       <audio ref={playerRef} src={audioPlayer.url} autoPlay preload="auto" controls>
         <source src={audioPlayer.url} type="audio/webm"/>
       </audio>
-      <button onClick={handlePlay}>Play</button>
-      <button onClick={handlePause}>Pause</button>
-      <button onClick={handleStop}>Stop</button>
-      <button onClick={handleFocus}>Focus</button>
+      <div style={{display: "flex", flexDirection: "row", justifyItems: "center", justifyContent: "center", height: "75px"}}>
+          <button style={{width: "125px", height: "50px"}} onClick={handlePlay}>Play</button>
+          <button style={{width: "125px", height: "50px"}} onClick={handlePause}>Pause</button>
+          <button style={{width: "125px", height: "50px"}} onClick={handleStop}>Stop</button>
+          <button style={{width: "125px", height: "50px"}} onClick={handleFocus}>Focus</button>
+      </div>
       <form onSubmit={handleClip}>
-        <div>
-          <input name="startInterval" step=".01" type="number" defaultValue="0.0" />-<input step=".01" name="endInterval" type="number" value={duration}
-          onChange={e => setDuration(audioPlayer.blob, duration)}/>
+        <div style={{display: "flex", justifyContent: "space-between", flexDirection: "row", width: "70%", height: "75px"}}>
+          <span style={{display: "flex", flexDirection: "row", border: "3px solid black", justifyItems: "center", justifyContent: "center", height: "50px"}}>
+            <span style={{display: "inner-flex", alignItems: "center", position: "relative", width: "17%", height: "50px"}}>
+              <input name="startInterval" step=".01" type="number" defaultValue="0.0" style={{width: "100%", height: "50px"}}/>
+              <span style={{position: "absolute", top: "13px",  height: "50px", alignSelf: "center"}}>s</span>
+            </span>
+            <span style={{margin: "0 25px 0 25px", alignSelf: "center"}}>-</span>
+            <span  style={{display: "inner-flex", alignItems: "center",  position: "relative", width: "17%", height: "50px"}}>
+              <input style={{width: "100%", height: "50px"}} step=".01" name="endInterval" type="number" value={duration}
+              onChange={e => setDuration(audioPlayer.blob, duration)}/>
+              <span style={{position: "absolute", top: "13px", height: "50px", alignSelf: "center"}}>s</span>
+            </span>
+          </span>
+          <span style={{flex: "1"}}></span>
+          <input type="submit" value="Clip" style={{width: "175px", height: "50px", backgroundColor: secondaryButtonColor, borderRadius: "15px"}} />
         </div>
-        <input type="submit" value="Clip" />
+        
       </form>
+      <textarea style={{width: "100%", height: "100px", border: "1px solid black", borderRadius: "25px", padding: "30px 30px 30px 30px"}} name="textFromVideo" value={textAreaText} onChange={e => setPostContent(e.target.value)}>
+  
+      </textarea>
+      <button style={{width: "80%", margin: "10px 10% 10px 10%", fontWeight: "bold", color: "white", height: standardButtonHeight, backgroundColor: standardButtonColor}} onClick={extractFromVideo}>Extract text from video</button>
     </div>
   );
 }

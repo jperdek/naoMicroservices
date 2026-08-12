@@ -3,6 +3,8 @@ import { useSearchParams } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Switch } from "radix-ui";
+import { AudioRecorderComponent } from "@/components/ui/AudioRecorder";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Loader2,
@@ -20,6 +22,8 @@ import {
   X,
   Pencil,
 } from "lucide-react";
+
+import "@/components/styles/toggle.css";
 
 // ── pose display names (Slovak) ───────────────────────────────────
 const POSE_DISPLAY_SK: Record<string, string> = {
@@ -838,6 +842,8 @@ function FrameCard({
   const [poseImgError, setPoseImgError] = useState(false);
   const [beforeVal, setBeforeVal] = useState("");
   const [afterVal, setAfterVal]   = useState("");
+  const [toggleText, setTextToggle] = useState(false);
+  const [overallRecordedMessage, onOverallRecordedMessageChange] = useState({});
 
   const imgEl = !imgError ? (
     <img src={imageUrl} alt={`Frame ${frame.idx}`} className="w-full h-full object-cover rounded-lg bg-muted" onError={() => setImgError(true)} />
@@ -848,6 +854,17 @@ function FrameCard({
       <Film className="h-5 w-5 text-muted-foreground/40" />
     </div>
   );
+
+  const extractText = (overallMessages: any) => {
+    const entries = Object.keys(overallMessages).length;
+    console.log("UPDATTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT");
+    console.log(overallMessages);
+    let resultingText = "";
+    for (let i = 0; i< entries; i++) {
+        resultingText = resultingText + " " + overallMessages[i];
+    }
+    return resultingText;
+  }
 
   return (
     <div
@@ -961,6 +978,25 @@ function FrameCard({
                 {poses.map((p) => <option key={p.name} value={p.name}>{POSE_DISPLAY_SK[p.name] ?? p.name}</option>)}
               </select>
             </label>
+          </div>
+          <div>
+            <div>
+              <p className="text-[10px] font-medium text-gray-500 uppercase tracking-wide" style={{ flex: "0 0 calc(100% - 70px)", marginLeft: "10px" }}>What NAO says</p>
+              <textarea style={{width: "100%", height: "100px", border: "1px solid black", borderRadius: "25px", padding: "30px 30px 30px 30px"}} name="textFromVideo" value={extractText(overallRecordedMessage) === ""? "Nothing so far" : extractText(overallRecordedMessage)} readonly>
+              </textarea>
+            </div>
+            <div style={{display: "flex"}}>
+              <p className="text-[10px] font-medium text-gray-500 uppercase tracking-wide" style={{ flex: "0 0 calc(100% - 70px)", marginLeft: "10px" }}>Record and speech summary</p>
+              
+              <Switch.Root onCheckedChange={(e) => { setTextToggle(e);}} style={{width: "50px", marginRight: "10px"}} className="SwitchRoot">
+                  <Switch.Thumb className="SwitchThumb" />
+              </Switch.Root>
+            </div>
+          </div>
+          <div style={{display: (toggleText)? "block": "none", position: "relative"}}>
+              <div style={{position: "absolute"}}>
+                <AudioRecorderComponent overallRecordedMessage={overallRecordedMessage} onOverallRecordedMessageChange={onOverallRecordedMessageChange}/>
+              </div>
           </div>
           <div className="px-3 pb-3">
             <button

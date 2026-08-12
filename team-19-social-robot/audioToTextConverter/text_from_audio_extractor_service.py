@@ -46,7 +46,11 @@ def extract_text_from_audio(request):
         return jsonify({"error": "No file and metadata to translate provided"}), 400
 
     device = audio_and_metadata.get("device", "cpu")
-    audio_file = base64.b64decode(audio_and_metadata.get("audio_file", ""))
+    print(audio_and_metadata)
+    audio_in_base64 = audio_and_metadata.get("audio_file", "")
+    if "base64," in audio_in_base64:
+        audio_in_base64 = audio_in_base64.split("base64,")[1]
+    audio_file = base64.b64decode(audio_in_base64)
     audio_path = audio_and_metadata.get("audio_path", None)
     if not audio_file and not audio_path:
         return jsonify({"error": "No file to translate provided"}), 400

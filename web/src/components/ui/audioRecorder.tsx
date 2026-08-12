@@ -7,7 +7,7 @@ import 'react-voice-recorder/dist/index.css';
 import { audioBufferToWebMBlob } from "./webmAudio";
 import { CustomAudioPlayer } from './customAudioPlayer';
 
-export function AudioRecorderComponent() {
+export function AudioRecorderComponent({ overallRecordedMessage, onOverallRecordedMessageChange }) {
     const [inputList, setInputList] = useState<{id: string, data: any}[]>([]);
     let index = 0;
 
@@ -31,7 +31,7 @@ export function AudioRecorderComponent() {
 
     //chunks cannot be processed - for example to determine duration
     function handleAudioStop(data, index): void {
-        const newElement = {id: index, data:<CustomAudioPlayer url={data.url} key={index} blob={data.blob} />};
+        const newElement = {id: index, data:<CustomAudioPlayer url={data.url} key={index} blob={data.blob} overallRecordedMessage={overallRecordedMessage} onOverallRecordedMessageChange={onOverallRecordedMessageChange}/>};
         console.log(data);
         console.log(index);
 
@@ -64,8 +64,13 @@ export function AudioRecorderComponent() {
                         concatenatedBuffer = appendBuffer(concatenatedBuffer, result);
                         //console.log(concatenatedBuffer);
                         audioBufferToWebMBlob(audioCtx, concatenatedBuffer).then((blob) => {
+                           let assignedIndexIdentifier = 0;
+
+                           if (inputList !== undefined) { assignedIndexIdentifier = inputList.length + 1; }
+                          console.log(assignedIndexIdentifier);
                            const url = window.URL.createObjectURL(blob);
-                            inputElement = {id: index, data:<CustomAudioPlayer url={url} key={inputList.length + 1} blob={blob} />};
+                            inputElement = {id: index, data:<CustomAudioPlayer url={url} key={assignedIndexIdentifier} blob={blob} 
+                            overallRecordedMessage={overallRecordedMessage} onOverallRecordedMessageChange={onOverallRecordedMessageChange}/>};
 
                             if (inputList.length > 1 && j === inputList.length - 1) {
                                 setInputList(inputList => [...inputList, inputElement]);
