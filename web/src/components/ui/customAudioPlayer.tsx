@@ -7,12 +7,12 @@ const LOCAL = true;
 const TO_TEXT_API = LOCAL? "http://localhost:9901" : "";
 
 
-export function CustomAudioPlayer({url, key, blob,
+export function CustomAudioPlayer({url, keyID, blob,
                             overallRecordedMessage, onOverallRecordedMessageChange}) {
   const playerRef = useRef<any>(null);
   const [duration, setDuration] = useState(0.0);
   const [audioPlayer, setAudioPlayer] = useState({"url": url,"blob": blob});
-  const [textAreaText, setTextAreaText] = useState("Text to be said by NAO. Possibly loaded from video.");
+  const [textAreaText, setTextAreaText] = useState(overallRecordedMessage[keyID]? overallRecordedMessage[keyID]: "Text to be said by NAO. Possibly loaded from video.");
 
   useEffect((): string => {
     async function endTime(blob) {
@@ -20,10 +20,11 @@ export function CustomAudioPlayer({url, key, blob,
       const audioCtx = new AudioContext();
       const arrayBuffer = await blob.arrayBuffer();
       const result = await audioCtx.decodeAudioData(arrayBuffer);
-      console.log(result.duration);
       setDuration(result.duration);
       return result.duration.toString();
     }
+    //console.log(overallRecordedMessage);
+    //setTextAreaText(overallRecordedMessage[keyID]);
     endTime(blob);
   }, [blob, duration]);
 
@@ -103,7 +104,7 @@ export function CustomAudioPlayer({url, key, blob,
                   console.log(clippedBuffer);
                     audioBufferToWebMBlob(audioCtx, clippedBuffer).then((blob) => {
                         const url = window.URL.createObjectURL(blob);
-                        //inputElement = {id: index, data:<CustomAudioPlayer url={url} key={inputList.length + 1} blob={blob} />};
+                        //inputElement = {id: index, data:<CustomAudioPlayer url={url} key={inputList.length + 1} keyID={inputList.length + 1} blob={blob} />};
                         
                         setAudioPlayer(url, blob);
                         audioPlayer.url = url;
@@ -139,9 +140,10 @@ export function CustomAudioPlayer({url, key, blob,
         const translation: string = data.translation;
         setTextAreaText(translation);
         const cloneDictOverallRecordedMessage = JSON.parse(JSON.stringify(overallRecordedMessage));
-        console.log(key);
-        if (key === undefined) { key = 0; }
-        cloneDictOverallRecordedMessage[key] = translation;
+        console.log(keyID);
+        if (keyID === undefined) { keyID = 0; }
+        if (cloneDictOverallRecordedMessage === "") { cloneDictOverallRecordedMessage = {}; }
+        cloneDictOverallRecordedMessage[keyID] = translation;
         onOverallRecordedMessageChange(cloneDictOverallRecordedMessage);
       };   
  }

@@ -1,10 +1,22 @@
 
+import os
+import json
 from typing import Optional
 from app.storage import (
+    exercise_exists,
     frames_dir,
     frame_path
 )
 
+def _read_json(path: str):
+    with open(path, "r") as f:
+        return json.load(f)
+
+def _write_json(path: str, data) -> None:
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
+        
+        
 def frames_assets_dir(exercise_id: str, frame_index: str) -> str:
     return os.path.join(frames_dir(exercise_id), str(frame_index))
 
@@ -23,10 +35,7 @@ def insert_voice_lines_into_frame_config(exercise_id: str, frame_index: int,
         raise FileNotFoundError(f"Frame {frame_index} not found in exercise '{exercise_id}'")
 
     frame_config = _read_json(path)
-    if voice_lines_config is not None:
-        frame_config["voice_lines"] = voice_lines_config
-    else:
-        raise Exception(f"Voice lines config for frame {frame_index} index is None")
+    frame_config["voice_lines"] = voice_lines_config
     _write_json(path, frame_config)
     return frame_config
 

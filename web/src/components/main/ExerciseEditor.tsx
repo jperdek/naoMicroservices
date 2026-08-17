@@ -21,6 +21,7 @@ import {
   MicOff,
   X,
   Pencil,
+  Save
 } from "lucide-react";
 
 import "@/components/styles/toggle.css";
@@ -724,6 +725,7 @@ export default function ExerciseEditor() {
                     inserting={insertingAt !== null}
                     deleting={deletingAt === frame.idx}
                     isDragOver={false}
+                    showStatus={showStatus}
                     draggable
                     onDragStart={() => drag.onDragStart(i)}
                     onDragEnter={() => {}}
@@ -735,6 +737,7 @@ export default function ExerciseEditor() {
                       drag.setOverSlot(slot);
                       setDragOver(slot);
                     }}
+
                   />
                 </div>
               ))}
@@ -833,6 +836,7 @@ function FrameCard({
   onDelete,
   inserting,
   deleting,
+  showStatus,
   isDragOver,
   ...dragProps
 }: FrameCardProps) {
@@ -844,6 +848,8 @@ function FrameCard({
   const [afterVal, setAfterVal]   = useState("");
   const [toggleText, setTextToggle] = useState(false);
   const [overallRecordedMessage, onOverallRecordedMessageChange] = useState({});
+  const [mainVoiceLines, mainVoiceLinesChange] = useState("Nothing so far");
+  const [savingAt, setSavingVoiceLinesAt]  = useState<number | null>(null);
 
   const imgEl = !imgError ? (
     <img src={imageUrl} alt={`Frame ${frame.idx}`} className="w-full h-full object-cover rounded-lg bg-muted" onError={() => setImgError(true)} />
@@ -857,13 +863,63 @@ function FrameCard({
 
   const extractText = (overallMessages: any) => {
     const entries = Object.keys(overallMessages).length;
-    console.log("UPDATTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT");
-    console.log(overallMessages);
     let resultingText = "";
-    for (let i = 0; i< entries; i++) {
+    for (let i = 0; i < entries; i++) {
         resultingText = resultingText + " " + overallMessages[i];
     }
     return resultingText;
+  }
+
+
+  useEffect(() => {
+    async function loadVoiceLines(overallRecordedMessage) {
+      if(!overallRecordedMessage || Object.keys(overallRecordedMessage).length === 0) {
+        try {
+          fetch(`${EDITOR_API}/voiceLines/config/exercise/${exerciseId}/frame/${frame.idx}`, {
+            method: "GET",
+          }).then((response) => {
+            if (response.ok) {
+              return response.json();
+            }
+            throw new Error("Message not in JSON");
+          })
+          .then((data) => {
+            if (extractText(data) !== "") {
+              mainVoiceLinesChange(extractText(data));
+              onOverallRecordedMessageChange(overallRecordedMessage);
+            }
+          })
+          .catch((error) => {
+      
+          });
+        } catch(e) {
+  
+        }
+      }
+    }
+    loadVoiceLines(overallRecordedMessage);
+  }, [overallRecordedMessage])
+
+  const onSavingVoiceLines = async (exerciseId: number, frameIdx: number, overallRecordedMessage: any) => {
+    setSavingVoiceLinesAt(frameIdx);
+    console.log(overallRecordedMessage);
+    try {
+      const res = await fetch(`${EDITOR_API}/voiceLines/config/exercise/${exerciseId}/frame/${frameIdx}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          "voice_lines": overallRecordedMessage
+        })
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      showStatus("success", "Hlášky uložené.");
+    } catch (err) {
+      showStatus("error", err instanceof Error ? err.message : "Uloženie hlášok zlyhalo");
+    } finally {
+      setSavingVoiceLinesAt(null);
+    }
   }
 
   return (
@@ -982,8 +1038,24 @@ function FrameCard({
           <div>
             <div>
               <p className="text-[10px] font-medium text-gray-500 uppercase tracking-wide" style={{ flex: "0 0 calc(100% - 70px)", marginLeft: "10px" }}>What NAO says</p>
-              <textarea style={{width: "100%", height: "100px", border: "1px solid black", borderRadius: "25px", padding: "30px 30px 30px 30px"}} name="textFromVideo" value={extractText(overallRecordedMessage) === ""? "Nothing so far" : extractText(overallRecordedMessage)} readonly>
+              <textarea  style={{width: "100%", height: "100px", border: "1px solid black", borderRadius: "25px",
+                 padding: "30px 30px 30px 30px"}} name="textFromVideo" 
+                 value={mainVoiceLines} onChange={(e) => {console.log(e)}} readOnly>
               </textarea>
+              <div className="px-3 pb-3">
+              <button
+                onClick={() => onSavingVoiceLines(exerciseId, frame.idx, overallRecordedMessage)}
+                disabled={savingAt === frame.idx}
+                className="w-full flex items-center justify-center gap-1.5 text-[11px] text-gray-400 hover:text-red-500 transition-colors py-1 rounded-md hover:bg-red-50"
+                aria-label="Uložiť hlášky"
+              >
+              {savingAt === frame.idx
+                ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                : <Save className="h-3.5 w-3.5" />
+              }
+              Uložiť hlášky
+            </button>
+        </div>
             </div>
             <div style={{display: "flex"}}>
               <p className="text-[10px] font-medium text-gray-500 uppercase tracking-wide" style={{ flex: "0 0 calc(100% - 70px)", marginLeft: "10px" }}>Record and speech summary</p>
@@ -995,7 +1067,7 @@ function FrameCard({
           </div>
           <div style={{display: (toggleText)? "block": "none", position: "relative"}}>
               <div style={{position: "absolute"}}>
-                <AudioRecorderComponent overallRecordedMessage={overallRecordedMessage} onOverallRecordedMessageChange={onOverallRecordedMessageChange}/>
+                <AudioRecorderComponent key={JSON.stringify(overallRecordedMessage)} overallRecordedMessage={overallRecordedMessage} onOverallRecordedMessageChange={onOverallRecordedMessageChange}/>
               </div>
           </div>
           <div className="px-3 pb-3">

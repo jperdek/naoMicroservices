@@ -19,6 +19,15 @@ from app.voice_lines import (
 load_dotenv()
 voice_lines_bp = Blueprint("voiceLines", __name__, url_prefix="/voiceLines")
 
+# ---------------------------------------------------------------------------
+# GET /voiceLines/conf
+# ---------------------------------------------------------------------------
+@voice_lines_bp.route("/conf", methods=["GET"])
+def get():
+    return jsonify({"OK": "hh"}), 200
+
+    
+    
 
 # ---------------------------------------------------------------------------
 # GET /voiceLines/config/exercise/<exercise_id>/frame/<int:frame_index>
@@ -31,9 +40,9 @@ def get_voice_lines_config_for_frame(exercise_id, frame_index):
         frame_config = get_frame(exercise_id, frame_index)
     except FileNotFoundError as e:
         return jsonify({"error": str(e)}), 404
-    if voice_lines_config := get_voice_lines_from_frame_config(exercise_id, frame_index)
+    if voice_lines_config := get_voice_lines_from_frame_config(exercise_id, frame_index):
         return jsonify(voice_lines_config), 200
-    return jsonify({"error": "Config for voice lines has not been inserted yet."}), 400
+    return jsonify({}), 200
 
 
 # ---------------------------------------------------------------------------
@@ -65,7 +74,7 @@ def get_voice_lines_sound(exercise_id, frame_index, file_name):
         frame_config = get_frame(exercise_id, frame_index)
     except FileNotFoundError as e:
         return jsonify({"error": str(e)}), 404
-    if voice_lines_sound_in_base64 := get_voice_lines_sound(exercise_id, frame_index)
+    if voice_lines_sound_in_base64 := get_voice_lines_sound(exercise_id, frame_index):
         return jsonify({"sound": voice_lines_sound_in_base64}), 200
     return jsonify({"error": "Config for voice lines has not been inserted yet."}), 400
 
