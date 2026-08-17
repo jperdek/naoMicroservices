@@ -8,11 +8,11 @@ const TO_TEXT_API = LOCAL? "http://localhost:9901" : "";
 
 
 export function CustomAudioPlayer({url, keyID, blob,
-                            overallRecordedMessage, onOverallRecordedMessageChange}) {
+                            overallRecordedMessage, onOverallRecordedMessageChange, mainVoiceLinesChange}) {
   const playerRef = useRef<any>(null);
   const [duration, setDuration] = useState(0.0);
   const [audioPlayer, setAudioPlayer] = useState({"url": url,"blob": blob});
-  const [textAreaText, setTextAreaText] = useState(overallRecordedMessage[keyID]? overallRecordedMessage[keyID]: "Text to be said by NAO. Possibly loaded from video.");
+  const [textAreaText, setTextAreaText] = useState("Text to be said by NAO. Possibly loaded from video.");
 
   useEffect((): string => {
     async function endTime(blob) {
@@ -120,6 +120,15 @@ export function CustomAudioPlayer({url, keyID, blob,
           });
   }
 
+  const extractText = (overallMessages: any) => {
+    const entries = Object.keys(overallMessages).length;
+    let resultingText = "";
+    for (let i = 0; i < entries; i++) {
+        resultingText = resultingText + " " + overallMessages[i];
+    }
+    return resultingText;
+  }
+
  const extractFromVideo = async () => {
       const audioBlob = audioPlayer.blob;
       const audioFile = await fetch(audioPlayer.url);
@@ -144,7 +153,9 @@ export function CustomAudioPlayer({url, keyID, blob,
         if (keyID === undefined) { keyID = 0; }
         if (cloneDictOverallRecordedMessage === "") { cloneDictOverallRecordedMessage = {}; }
         cloneDictOverallRecordedMessage[keyID] = translation;
+        console.log(cloneDictOverallRecordedMessage);
         onOverallRecordedMessageChange(cloneDictOverallRecordedMessage);
+        mainVoiceLinesChange(extractText(cloneDictOverallRecordedMessage));
       };   
  }
 
@@ -180,7 +191,7 @@ console.log(textAreaText);
         </div>
         
       </form>
-      <textarea style={{width: "100%", height: "100px", border: "1px solid black", borderRadius: "25px", padding: "30px 30px 30px 30px"}} name="textFromVideo" value={textAreaText} onChange={e => setPostContent(e.target.value)}>
+      <textarea style={{width: "100%", height: "100px", border: "1px solid black", borderRadius: "25px", padding: "30px 30px 30px 30px"}} name="textFromVideo" value={textAreaText} onChange={e => {}}>
   
       </textarea>
       <button style={{width: "80%", margin: "10px 10% 10px 10%", fontWeight: "bold", color: "white", height: standardButtonHeight, backgroundColor: standardButtonColor}} onClick={extractFromVideo}>Extract text from video</button>

@@ -1067,7 +1067,7 @@ function FrameCard({
           </div>
           <div style={{display: (toggleText)? "block": "none", position: "relative"}}>
               <div style={{position: "absolute"}}>
-                <AudioRecorderComponent key={JSON.stringify(overallRecordedMessage)} overallRecordedMessage={overallRecordedMessage} onOverallRecordedMessageChange={onOverallRecordedMessageChange}/>
+                <AudioRecorderComponent overallRecordedMessage={overallRecordedMessage} onOverallRecordedMessageChange={onOverallRecordedMessageChange} mainVoiceLinesChange={mainVoiceLinesChange}/>
               </div>
           </div>
           <div className="px-3 pb-3">

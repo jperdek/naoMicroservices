@@ -7,7 +7,7 @@ import 'react-voice-recorder/dist/index.css';
 import { audioBufferToWebMBlob } from "./webmAudio";
 import { CustomAudioPlayer } from './customAudioPlayer';
 
-export function AudioRecorderComponent({ overallRecordedMessage, onOverallRecordedMessageChange }) {
+export function AudioRecorderComponent({ overallRecordedMessage, onOverallRecordedMessageChange, mainVoiceLinesChange }) {
     /*function dictToList(overallRecordedMessage: any) {
         const array = [];
         for (let i = 0; i<Object.keys(overallRecordedMessage).length; i++) {
@@ -39,7 +39,8 @@ export function AudioRecorderComponent({ overallRecordedMessage, onOverallRecord
 
     //chunks cannot be processed - for example to determine duration
     function handleAudioStop(data, index): void {
-        const newElement = {id: index, data:<CustomAudioPlayer url={data.url} keyID={index} key={index} blob={data.blob} overallRecordedMessage={overallRecordedMessage} onOverallRecordedMessageChange={onOverallRecordedMessageChange}/>};
+        const newElement = {id: index, data:<CustomAudioPlayer mainVoiceLinesChange={mainVoiceLinesChange}
+            url={data.url} keyID={index} key={index} blob={data.blob} overallRecordedMessage={overallRecordedMessage} onOverallRecordedMessageChange={onOverallRecordedMessageChange}/>};
         console.log(data);
         console.log(index);
 
@@ -77,7 +78,8 @@ export function AudioRecorderComponent({ overallRecordedMessage, onOverallRecord
                            if (inputList !== undefined) { assignedIndexIdentifier = inputList.length + 1; }
                           console.log(assignedIndexIdentifier);
                            const url = window.URL.createObjectURL(blob);
-                            inputElement = {id: index, data:<CustomAudioPlayer url={url} keyID={assignedIndexIdentifier} key={assignedIndexIdentifier} blob={blob} 
+                            inputElement = {id: index, data:<CustomAudioPlayer url={url} keyID={assignedIndexIdentifier} key={assignedIndexIdentifier} blob={blob}
+                            mainVoiceLinesChange={mainVoiceLinesChange} 
                             overallRecordedMessage={overallRecordedMessage} onOverallRecordedMessageChange={onOverallRecordedMessageChange}/>};
 
                             if (inputList.length > 1 && j === inputList.length - 1) {
@@ -127,6 +129,7 @@ export function AudioRecorderComponent({ overallRecordedMessage, onOverallRecord
     }
     const rows = [];
     for (let i=0; i<inputList.length; i++) { rows.push(inputList[i].data); }
+    console.log("Redrawing");
     return (
         <div>
             <Recorder
