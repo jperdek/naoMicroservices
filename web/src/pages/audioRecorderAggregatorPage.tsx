@@ -8,7 +8,7 @@ export default function AudioRecorderAggregatorPage() {
         <h1 className="text-xl font-semibold tracking-tight text-foreground">Hlášky robota</h1>
         <p className="text-xs text-muted-foreground mt-0.5">Povedzte čo NAO má povedať.</p>
       </div>
-      <AudioRecorderComponent overallRecordedMessage={recordedMessages} onOverallRecordedMessageChange={onOverallRecordedMessageChange}/>
+      <AudioRecorderComponent saveAudioFile={(audio, audioFormat) => {}} overallRecordedMessage={recordedMessages} onOverallRecordedMessageChange={onOverallRecordedMessageChange}/>
     </div>
   );
 }

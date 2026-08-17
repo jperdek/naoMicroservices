@@ -8,7 +8,7 @@ const TO_TEXT_API = LOCAL? "http://localhost:9901" : "";
 
 
 export function CustomAudioPlayer({url, keyID, blob,
-                            overallRecordedMessage, onOverallRecordedMessageChange, mainVoiceLinesChange}) {
+                            overallRecordedMessage, onOverallRecordedMessageChange, saveAudioFile}) {
   const playerRef = useRef<any>(null);
   const [duration, setDuration] = useState(0.0);
   const [audioPlayer, setAudioPlayer] = useState({"url": url,"blob": blob});
@@ -120,15 +120,6 @@ export function CustomAudioPlayer({url, keyID, blob,
           });
   }
 
-  const extractText = (overallMessages: any) => {
-    const entries = Object.keys(overallMessages).length;
-    let resultingText = "";
-    for (let i = 0; i < entries; i++) {
-        resultingText = resultingText + " " + overallMessages[i];
-    }
-    return resultingText;
-  }
-
  const extractFromVideo = async () => {
       const audioBlob = audioPlayer.blob;
       const audioFile = await fetch(audioPlayer.url);
@@ -148,19 +139,17 @@ export function CustomAudioPlayer({url, keyID, blob,
         console.log(data);
         const translation: string = data.translation;
         setTextAreaText(translation);
-        const cloneDictOverallRecordedMessage = JSON.parse(JSON.stringify(overallRecordedMessage));
-        console.log(keyID);
-        if (keyID === undefined) { keyID = 0; }
-        if (cloneDictOverallRecordedMessage === "") { cloneDictOverallRecordedMessage = {}; }
-        cloneDictOverallRecordedMessage[keyID] = translation;
-        console.log(cloneDictOverallRecordedMessage);
-        onOverallRecordedMessageChange(cloneDictOverallRecordedMessage);
-        mainVoiceLinesChange(extractText(cloneDictOverallRecordedMessage));
+
+        if (keyID === undefined) { keyID = 0; };
+        overallRecordedMessage[keyID] = translation;
+
+        saveAudioFile(audioInBase64, keyID + ".webm");
+        overallRecordedMessage["extractedText"] = translation;
+        console.log(overallRecordedMessage);
+        onOverallRecordedMessageChange(overallRecordedMessage);
       };   
  }
 
-
-console.log(textAreaText);
   return (
     <div>
       <audio ref={playerRef} src={audioPlayer.url} autoPlay preload="auto" controls>

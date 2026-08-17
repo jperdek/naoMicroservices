@@ -7,7 +7,7 @@ import 'react-voice-recorder/dist/index.css';
 import { audioBufferToWebMBlob } from "./webmAudio";
 import { CustomAudioPlayer } from './customAudioPlayer';
 
-export function AudioRecorderComponent({ overallRecordedMessage, onOverallRecordedMessageChange, mainVoiceLinesChange }) {
+export function AudioRecorderComponent({ overallRecordedMessage, onOverallRecordedMessageChange, saveAudioFile }) {
     /*function dictToList(overallRecordedMessage: any) {
         const array = [];
         for (let i = 0; i<Object.keys(overallRecordedMessage).length; i++) {
@@ -39,13 +39,13 @@ export function AudioRecorderComponent({ overallRecordedMessage, onOverallRecord
 
     //chunks cannot be processed - for example to determine duration
     function handleAudioStop(data, index): void {
-        const newElement = {id: index, data:<CustomAudioPlayer mainVoiceLinesChange={mainVoiceLinesChange}
-            url={data.url} keyID={index} key={index} blob={data.blob} overallRecordedMessage={overallRecordedMessage} onOverallRecordedMessageChange={onOverallRecordedMessageChange}/>};
-        console.log(data);
-        console.log(index);
+        const newElement = {id: index, data:<CustomAudioPlayer
+            url={data.url} keyID={index} key={index} blob={data.blob} overallRecordedMessage={overallRecordedMessage}
+             saveAudioFile={saveAudioFile} onOverallRecordedMessageChange={onOverallRecordedMessageChange}/>};
 
         setInputList(inputList => [...inputList, newElement]);
         inputList.push(newElement);
+        console.log(inputList);
 
         handleReset();
     }
@@ -74,13 +74,12 @@ export function AudioRecorderComponent({ overallRecordedMessage, onOverallRecord
                         //console.log(concatenatedBuffer);
                         audioBufferToWebMBlob(audioCtx, concatenatedBuffer).then((blob) => {
                            let assignedIndexIdentifier = 0;
-
-                           if (inputList !== undefined) { assignedIndexIdentifier = inputList.length + 1; }
-                          console.log(assignedIndexIdentifier);
+                           if (inputList !== undefined) { assignedIndexIdentifier = inputList.length; }
+                            console.log(assignedIndexIdentifier);
                            const url = window.URL.createObjectURL(blob);
-                            inputElement = {id: index, data:<CustomAudioPlayer url={url} keyID={assignedIndexIdentifier} key={assignedIndexIdentifier} blob={blob}
-                            mainVoiceLinesChange={mainVoiceLinesChange} 
-                            overallRecordedMessage={overallRecordedMessage} onOverallRecordedMessageChange={onOverallRecordedMessageChange}/>};
+                            inputElement = {id: assignedIndexIdentifier, data:<CustomAudioPlayer url={url} keyID={assignedIndexIdentifier} key={assignedIndexIdentifier} blob={blob}
+                            overallRecordedMessage={overallRecordedMessage} saveAudioFile={saveAudioFile}
+                            onOverallRecordedMessageChange={onOverallRecordedMessageChange}/>};
 
                             if (inputList.length > 1 && j === inputList.length - 1) {
                                 setInputList(inputList => [...inputList, inputElement]);
@@ -114,7 +113,6 @@ export function AudioRecorderComponent({ overallRecordedMessage, onOverallRecord
         };
     }
 
-
     const state = {
         audioDetails: {
             url: null,
@@ -129,7 +127,6 @@ export function AudioRecorderComponent({ overallRecordedMessage, onOverallRecord
     }
     const rows = [];
     for (let i=0; i<inputList.length; i++) { rows.push(inputList[i].data); }
-    console.log("Redrawing");
     return (
         <div>
             <Recorder
@@ -137,7 +134,7 @@ export function AudioRecorderComponent({ overallRecordedMessage, onOverallRecord
                 title={"New recording"}
                 audioURL={state.audioDetails.url}
                 showUIAudio
-                handleAudioStop={data => {handleAudioStop(data, index); index += 1; }}
+                handleAudioStop={data => {handleAudioStop(data, index); index += 1;}}
                 handleAudioUpload={data => handleAudioUpload(data)}
                 handleCountDown={data => handleCountDown(data)}
                 handleReset={() => handleReset()}
@@ -145,7 +142,7 @@ export function AudioRecorderComponent({ overallRecordedMessage, onOverallRecord
             />
             {rows}
             <div>
-                <button onClick={mergeRecordedFiles}>Merge</button>
+                <button onClick={() => {mergeRecordedFiles(); index += 1; }}>Merge</button>
             </div>
         </div>
     );

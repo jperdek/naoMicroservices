@@ -847,10 +847,10 @@ function FrameCard({
   const [beforeVal, setBeforeVal] = useState("");
   const [afterVal, setAfterVal]   = useState("");
   const [toggleText, setTextToggle] = useState(false);
-  const [overallRecordedMessage, onOverallRecordedMessageChange] = useState({});
-  const [mainVoiceLines, mainVoiceLinesChange] = useState("Nothing so far");
+  const [overallRecordedMessage, onOverallRecordedMessageChange] = useState({"extractedText": "Nothing so far"});
   const [savingAt, setSavingVoiceLinesAt]  = useState<number | null>(null);
 
+  let loaded = false;
   const imgEl = !imgError ? (
     <img src={imageUrl} alt={`Frame ${frame.idx}`} className="w-full h-full object-cover rounded-lg bg-muted" onError={() => setImgError(true)} />
   ) : poseImageUrl && !poseImgError ? (
@@ -862,18 +862,27 @@ function FrameCard({
   );
 
   const extractText = (overallMessages: any) => {
+   // function trim(s){ 
+   //      return ( s || '' ).replace( /^\s+|\s+$/g, '' ); 
+   // }
+   // console.log(overallMessages);
     const entries = Object.keys(overallMessages).length;
     let resultingText = "";
-    for (let i = 0; i < entries; i++) {
+    for (let i = 0; i < entries - 1; i++) {
+      if (overallMessages[i] !== undefined) {
         resultingText = resultingText + " " + overallMessages[i];
+      }
     }
     return resultingText;
+    //console.log(trim(resultingText));
+    //return trim(resultingText);
   }
 
 
   useEffect(() => {
     async function loadVoiceLines(overallRecordedMessage) {
-      if(!overallRecordedMessage || Object.keys(overallRecordedMessage).length === 0) {
+      if(!overallRecordedMessage || !loaded) {
+       loaded = true;
         try {
           fetch(`${EDITOR_API}/voiceLines/config/exercise/${exerciseId}/frame/${frame.idx}`, {
             method: "GET",
@@ -884,21 +893,38 @@ function FrameCard({
             throw new Error("Message not in JSON");
           })
           .then((data) => {
+            console.log(data);
             if (extractText(data) !== "") {
-              mainVoiceLinesChange(extractText(data));
-              onOverallRecordedMessageChange(overallRecordedMessage);
-            }
+              
+              console.log(extractText(data));
+              const newOverallRecordedMessage = overallRecordedMessage;
+              newOverallRecordedMessage["extractedText"] = extractText(data);
+              onOverallRecordedMessageChange(newOverallRecordedMessage);
+            } 
           })
           .catch((error) => {
-      
           });
         } catch(e) {
-  
         }
       }
     }
     loadVoiceLines(overallRecordedMessage);
   }, [overallRecordedMessage])
+
+  const saveAudioFile = async (audioInBase64, fileNameWithFormat) => {
+    const res = await fetch(`${EDITOR_API}/voiceLines/sound/exercise/${exerciseId}/frame/${frame.idx}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          "sound": audioInBase64,
+          "file_name": fileNameWithFormat
+        })
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      //showStatus("success", "Subot s hláškami " + fileNameWithFormat + " uložené.");
+  };
 
   const onSavingVoiceLines = async (exerciseId: number, frameIdx: number, overallRecordedMessage: any) => {
     setSavingVoiceLinesAt(frameIdx);
@@ -1040,7 +1066,7 @@ function FrameCard({
               <p className="text-[10px] font-medium text-gray-500 uppercase tracking-wide" style={{ flex: "0 0 calc(100% - 70px)", marginLeft: "10px" }}>What NAO says</p>
               <textarea  style={{width: "100%", height: "100px", border: "1px solid black", borderRadius: "25px",
                  padding: "30px 30px 30px 30px"}} name="textFromVideo" 
-                 value={mainVoiceLines} onChange={(e) => {console.log(e)}} readOnly>
+                 value={extractText(overallRecordedMessage) === ""?  overallRecordedMessage["extractedText"] : extractText(overallRecordedMessage)} onChange={(e) => {console.log(e)}} readOnly>
               </textarea>
               <div className="px-3 pb-3">
               <button
@@ -1067,7 +1093,7 @@ function FrameCard({
           </div>
           <div style={{display: (toggleText)? "block": "none", position: "relative"}}>
               <div style={{position: "absolute"}}>
-                <AudioRecorderComponent overallRecordedMessage={overallRecordedMessage} onOverallRecordedMessageChange={onOverallRecordedMessageChange} mainVoiceLinesChange={mainVoiceLinesChange}/>
+                <AudioRecorderComponent saveAudioFile={saveAudioFile} overallRecordedMessage={overallRecordedMessage} onOverallRecordedMessageChange={onOverallRecordedMessageChange}/>
               </div>
           </div>
           <div className="px-3 pb-3">
