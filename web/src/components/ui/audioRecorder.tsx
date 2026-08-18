@@ -55,7 +55,6 @@ const AudioRecorderComponent = React.forwardRef((props, ref) => {
         const blob = new Blob([byteArray], {type: "audio/webm;codecs=opus"});
         reader.onload = function (evt) {
             const audioBuffer = evt.target.result;
-            //const blob = new Blob([audioBuffer], {"type": "audio/webm;codecs=opus"});//NOT SAME contrast to blob!
             const url = URL.createObjectURL(blob);
             createCustomAudioPlayer(url, blob, index);
         }

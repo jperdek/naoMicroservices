@@ -44,6 +44,7 @@ const LOCAL = true; //when nginx is use change to false
 const UPLOAD_API = LOCAL? "http://localhost:7000" : ""; //empty for reverse proxy nginx
 const EDITOR_API = LOCAL? "http://localhost:7001" : "";
 const POSES_API  = LOCAL? "http://localhost:8000" : "";
+const ROBOT_API  = LOCAL? "http://localhost:5000" : "";
 const LLM_API_BASE = import.meta.env.VITE_LLM_API_BASE ?? "https://litellm.blockfinlab.xyz";
 const LLM_API_KEY  = import.meta.env.VITE_LLM_API_KEY ?? "";
 const LLM_MODEL    = "gpt-5.4-fiit";
@@ -847,10 +848,11 @@ function FrameCard({
   const [beforeVal, setBeforeVal] = useState("");
   const [afterVal, setAfterVal]   = useState("");
   const [toggleText, setTextToggle] = useState(false);
+  const [naoSaying, setNaoSaying] = useState(false);
   const [overallRecordedMessage, onOverallRecordedMessageChange] = useState({"extractedText": "Nothing so far"});
   const [savingAt, setSavingVoiceLinesAt]  = useState<number | null>(null);
-   const audioRecorderRef = useRef(null);
-
+  const audioRecorderRef = useRef(null);
+  const aggregatedVoiceLinesRef = useRef<HTMLTextAreaElement>(null);
   let configLoaded = false;
   let voiceLinesLoaded = false;
   const imgEl = !imgError ? (
@@ -1000,6 +1002,20 @@ function FrameCard({
     }
   }
 
+  const testVoiceLines = async () => {
+    if (audioRecorderRef.current === null) {
+      const textConfigToBeSaid = audioRecorderRef.current.getTextConfigFromVoiceLinesToBeSaidByRobot();
+    } else {
+      if (aggregatedVoiceLinesRef === null) { 
+        throw new Exception("HTML Textarea not initialized.");
+        return;
+      }
+      const textToBeSaidByRobot = aggregatedVoiceLinesRef.current.value;
+      console.log(textToBeSaidByRobot);
+    }
+  }
+
+
   return (
     <div
       {...dragProps}
@@ -1116,11 +1132,12 @@ function FrameCard({
           <div>
             <div>
               <p className="text-[10px] font-medium text-gray-500 uppercase tracking-wide" style={{ flex: "0 0 calc(100% - 70px)", marginLeft: "10px" }}>What NAO says</p>
-              <textarea  style={{width: "100%", height: "100px", border: "1px solid black", borderRadius: "25px",
+              <textarea ref={aggregatedVoiceLinesRef} style={{width: "100%", height: "100px", border: "1px solid black", borderRadius: "25px",
                  padding: "30px 30px 30px 30px"}} name="textFromVideo" 
                  value={extractText(overallRecordedMessage) === ""?  overallRecordedMessage["extractedText"] : extractText(overallRecordedMessage)} onChange={(e) => {console.log(e)}} readOnly>
               </textarea>
               <div className="px-3 pb-3">
+
               <button
                 onClick={() => onSavingVoiceLines(exerciseId, frame.idx, overallRecordedMessage)}
                 disabled={savingAt === frame.idx}
@@ -1133,6 +1150,19 @@ function FrameCard({
               }
               Uložiť hlášky
             </button>
+            <Button
+              size="sm"
+              onClick={testVoiceLines}
+              disabled={naoSaying}
+              className="text-primary-foreground"
+            >
+              {naoSaying
+                ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />
+                : <Play className="h-3.5 w-3.5 mr-1.5" />
+              }
+              Povedz
+            </Button>
+          </div>
         </div>
             </div>
             <div style={{display: "flex"}}>
