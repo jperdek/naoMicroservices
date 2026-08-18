@@ -1,6 +1,7 @@
 
 import os
 import json
+import base64
 from typing import Optional
 from app.storage import (
     exercise_exists,
@@ -57,10 +58,10 @@ def get_voice_lines_from_frame_config(exercise_id: str, frame_index: int) -> dic
 
 
 def insert_voice_lines_sound(exercise_id: str, frame_index: int,
-                sound_in_base64: str, file_name: str) -> dict:
+                sound_in_base64: str, file_name: str) -> None:
     """
-    Inserts voice lines into specific frame config json
-    Returns the updated config dict.
+    Saves webm sound into file and separate directory for particular frame
+    Returns None
     """
     if not exercise_exists(exercise_id):
         raise FileNotFoundError(f"Exercise '{exercise_id}' not found")
@@ -71,17 +72,19 @@ def insert_voice_lines_sound(exercise_id: str, frame_index: int,
 
     frame_assets_dir = frames_assets_dir(exercise_id, frame_index)
     sound_file_location = os.path.join(frame_assets_dir, file_name)
-    if not os.path.exists(sound_file_location):
-        os.makedirs(sound_file_location)
+    if not os.path.exists(frame_assets_dir):
+        os.makedirs(frame_assets_dir)
+    if "base64," in sound_in_base64:
+        sound_in_base64 = sound_in_base64.split("base64,")[1]
     audio = base64.b64decode(sound_in_base64)
+   
     with open(sound_file_location, "wb") as file:
         file.write(audio)
-    return frame_config
 
 
 def get_voice_lines_sound(exercise_id: str, frame_index: int, file_name: str) -> Optional[str]:
     """
-    Returns voice lines config from exercise config
+    Returns sound file encoded in base64
     """
     if not exercise_exists(exercise_id):
         raise FileNotFoundError(f"Exercise '{exercise_id}' not found")
@@ -95,7 +98,7 @@ def get_voice_lines_sound(exercise_id: str, frame_index: int, file_name: str) ->
     if not os.path.exists(sound_file_location):
         return None
     with open(sound_file_location, "rb") as file:
-        fileContent = file.read()
-        audio_in_base64 = base64.b64encode(audio_in_base64)
+        file_content = file.read()
+        audio_in_base64 = base64.b64encode(file_content).decode("utf-8")
     return audio_in_base64
 

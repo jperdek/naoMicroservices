@@ -1,13 +1,16 @@
 
 import ReactDOM from "react-dom/client";
-import React, { useState } from "react";
+import React, { useState, forwardRef, useImperativeHandle } from "react";
 
 import { Recorder } from 'react-voice-recorder';
 import 'react-voice-recorder/dist/index.css';
 import { audioBufferToWebMBlob } from "./webmAudio";
 import { CustomAudioPlayer } from './customAudioPlayer';
 
-export function AudioRecorderComponent({ overallRecordedMessage, onOverallRecordedMessageChange, saveAudioFile }) {
+const AudioRecorderComponent = React.forwardRef((props, ref) => {
+  useImperativeHandle(ref, () => ({
+    createCustomAudioPlayerFromBase64
+  }));
     /*function dictToList(overallRecordedMessage: any) {
         const array = [];
         for (let i = 0; i<Object.keys(overallRecordedMessage).length; i++) {
@@ -15,7 +18,9 @@ export function AudioRecorderComponent({ overallRecordedMessage, onOverallRecord
         }
         return array;
     }*/
-
+    const overallRecordedMessage = props.overallRecordedMessage;
+    const onOverallRecordedMessageChange = props.onOverallRecordedMessageChange;
+    const saveAudioFile = props.saveAudioFile;
     const [inputList, setInputList] = useState<{id: string, data: any}[]>([]);
     let index = 0;
 
@@ -37,15 +42,38 @@ export function AudioRecorderComponent({ overallRecordedMessage, onOverallRecord
         return tmp;
     }
 
-    //chunks cannot be processed - for example to determine duration
-    function handleAudioStop(data, index): void {
+
+    function createCustomAudioPlayerFromBase64(audioInBase64, index) {
+        const reader = new FileReader();
+        
+        const byteCharacters = atob(audioInBase64);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], {type: "audio/webm;codecs=opus"});
+        reader.onload = function (evt) {
+            const audioBuffer = evt.target.result;
+            //const blob = new Blob([audioBuffer], {"type": "audio/webm;codecs=opus"});//NOT SAME contrast to blob!
+            const url = URL.createObjectURL(blob);
+            createCustomAudioPlayer(url, blob, index);
+        }
+        reader.readAsBinaryString(blob);
+    }
+
+    function createCustomAudioPlayer(url, blob, index) {
         const newElement = {id: index, data:<CustomAudioPlayer
-            url={data.url} keyID={index} key={index} blob={data.blob} overallRecordedMessage={overallRecordedMessage}
+            url={url} keyID={index} key={index} blob={blob} overallRecordedMessage={overallRecordedMessage}
              saveAudioFile={saveAudioFile} onOverallRecordedMessageChange={onOverallRecordedMessageChange}/>};
 
         setInputList(inputList => [...inputList, newElement]);
         inputList.push(newElement);
-        console.log(inputList);
+    }
+
+    //chunks cannot be processed - for example to determine duration
+    function handleAudioStop(data, index): void {
+        createCustomAudioPlayer(data.url, data.blob, index);
 
         handleReset();
     }
@@ -146,4 +174,6 @@ export function AudioRecorderComponent({ overallRecordedMessage, onOverallRecord
             </div>
         </div>
     );
-}
+});
+
+export {AudioRecorderComponent};

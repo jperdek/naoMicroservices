@@ -849,8 +849,10 @@ function FrameCard({
   const [toggleText, setTextToggle] = useState(false);
   const [overallRecordedMessage, onOverallRecordedMessageChange] = useState({"extractedText": "Nothing so far"});
   const [savingAt, setSavingVoiceLinesAt]  = useState<number | null>(null);
+   const audioRecorderRef = useRef(null);
 
-  let loaded = false;
+  let configLoaded = false;
+  let voiceLinesLoaded = false;
   const imgEl = !imgError ? (
     <img src={imageUrl} alt={`Frame ${frame.idx}`} className="w-full h-full object-cover rounded-lg bg-muted" onError={() => setImgError(true)} />
   ) : poseImageUrl && !poseImgError ? (
@@ -881,8 +883,8 @@ function FrameCard({
 
   useEffect(() => {
     async function loadVoiceLines(overallRecordedMessage) {
-      if(!overallRecordedMessage || !loaded) {
-       loaded = true;
+      if(!overallRecordedMessage || !configLoaded) {
+       configLoaded = true;
         try {
           fetch(`${EDITOR_API}/voiceLines/config/exercise/${exerciseId}/frame/${frame.idx}`, {
             method: "GET",
@@ -895,11 +897,13 @@ function FrameCard({
           .then((data) => {
             console.log(data);
             if (extractText(data) !== "") {
-              
-              console.log(extractText(data));
-              const newOverallRecordedMessage = overallRecordedMessage;
-              newOverallRecordedMessage["extractedText"] = extractText(data);
-              onOverallRecordedMessageChange(newOverallRecordedMessage);
+              const entries = Object.keys(data).length;
+              for (let i = 0; i < entries - 1; i++) {
+                overallRecordedMessage[i] = data[i];
+              }
+              overallRecordedMessage["extractedText"] = extractText(data);
+              onOverallRecordedMessageChange(overallRecordedMessage);
+              console.log(overallRecordedMessage);
             } 
           })
           .catch((error) => {
@@ -910,6 +914,54 @@ function FrameCard({
     }
     loadVoiceLines(overallRecordedMessage);
   }, [overallRecordedMessage])
+
+
+
+  useEffect(()=>{
+    async function fetchAllVoiceLines() {
+    console.log("Callback launched");
+    console.log(toggleText);
+    if (toggleText && !voiceLinesLoaded) {
+      voiceLinesLoaded = true;
+      console.log("{PASSEEEDD");
+      const entries = Object.keys(overallRecordedMessage).length;
+      let resultingText = "";
+      console.log(overallRecordedMessage);
+      for (let i = 0; i < entries - 1; i++) {
+        console.log(overallRecordedMessage[i]);
+        const fileName = i + ".webm";
+        if (overallRecordedMessage[i] !== undefined) {
+            try {
+              fetch(`${EDITOR_API}/voiceLines/sound/exercise/${exerciseId}/frame/${frame.idx}/${fileName}`, {
+                method: "GET",
+              }).then((response) => {
+                if (response.ok) {
+                  return response.json();
+                }
+                throw new Error("Message not in JSON");
+              })
+              .then((data) => {
+                console.log(data);
+
+                const audioFormat = data["audioFormat"];
+                const audioInBase64 = data["sound"];
+                if (audioFormat === "webm") {
+                  console.log(audioRecorderRef);
+                  audioRecorderRef.current.createCustomAudioPlayerFromBase64(audioInBase64, i);
+                }
+              })
+              .catch((error) => {
+                console.log(error);
+              });
+            } catch(e) {
+              console.log(e);
+            }
+          }
+        }
+      }
+    }
+     fetchAllVoiceLines(); 
+  },[toggleText]) 
 
   const saveAudioFile = async (audioInBase64, fileNameWithFormat) => {
     const res = await fetch(`${EDITOR_API}/voiceLines/sound/exercise/${exerciseId}/frame/${frame.idx}`, {
@@ -1093,7 +1145,7 @@ function FrameCard({
           </div>
           <div style={{display: (toggleText)? "block": "none", position: "relative"}}>
               <div style={{position: "absolute"}}>
-                <AudioRecorderComponent saveAudioFile={saveAudioFile} overallRecordedMessage={overallRecordedMessage} onOverallRecordedMessageChange={onOverallRecordedMessageChange}/>
+                <AudioRecorderComponent ref={audioRecorderRef} saveAudioFile={saveAudioFile} overallRecordedMessage={overallRecordedMessage} onOverallRecordedMessageChange={onOverallRecordedMessageChange}/>
               </div>
           </div>
           <div className="px-3 pb-3">

@@ -33,7 +33,7 @@ def get():
 # GET /voiceLines/config/exercise/<exercise_id>/frame/<int:frame_index>
 # ---------------------------------------------------------------------------
 @voice_lines_bp.route("/config/exercise/<exercise_id>/frame/<int:frame_index>", methods=["GET"])
-def get_voice_lines_config_for_frame(exercise_id, frame_index):
+def get_voice_lines_config_for_frame_api(exercise_id, frame_index):
     if not exercise_exists(exercise_id):
         return jsonify({"error": f"Exercise '{exercise_id}' not found"}), 404
     try:
@@ -49,7 +49,7 @@ def get_voice_lines_config_for_frame(exercise_id, frame_index):
 # POST /voiceLines/config/exercise/<exercise_id>/frame/<int:frame_index>
 # ---------------------------------------------------------------------------
 @voice_lines_bp.route("/config/exercise/<exercise_id>/frame/<int:frame_index>", methods=["POST"])
-def insert_voice_lines_config_for_frame(exercise_id, frame_index):
+def insert_voice_lines_config_for_frame_api(exercise_id, frame_index):
     if not exercise_exists(exercise_id):
         return jsonify({"error": f"Exercise '{exercise_id}' not found"}), 404
     if request.content_type and "multipart/form-data" in request.content_type:
@@ -67,23 +67,23 @@ def insert_voice_lines_config_for_frame(exercise_id, frame_index):
 # GET /voiceLines/sound/exercise/<exercise_id>/frame/<int:frame_index>
 # ---------------------------------------------------------------------------
 @voice_lines_bp.route("/sound/exercise/<exercise_id>/frame/<int:frame_index>/<file_name>", methods=["GET"])
-def get_voice_lines_sound(exercise_id, frame_index, file_name):
+def get_voice_lines_sound_api(exercise_id, frame_index, file_name):
     if not exercise_exists(exercise_id):
         return jsonify({"error": f"Exercise '{exercise_id}' not found"}), 404
     try:
         frame_config = get_frame(exercise_id, frame_index)
     except FileNotFoundError as e:
         return jsonify({"error": str(e)}), 404
-    if voice_lines_sound_in_base64 := get_voice_lines_sound(exercise_id, frame_index):
-        return jsonify({"sound": voice_lines_sound_in_base64}), 200
-    return jsonify({"error": "Config for voice lines has not been inserted yet."}), 400
+    if voice_lines_sound_in_base64 := get_voice_lines_sound(exercise_id, frame_index, file_name):
+        return jsonify({"sound": voice_lines_sound_in_base64, "audioFormat": "webm"}), 200
+    return jsonify({"error": "No file extracted."}), 400
 
 
 # ---------------------------------------------------------------------------
 # POST /voiceLines/sound/exercise/<exercise_id>/frame/<int:frame_index>
 # ---------------------------------------------------------------------------
 @voice_lines_bp.route("/sound/exercise/<exercise_id>/frame/<int:frame_index>", methods=["POST"])
-def insert_voice_lines_sound(exercise_id, frame_index):
+def insert_voice_lines_sound_api(exercise_id, frame_index):
     if not exercise_exists(exercise_id):
         return jsonify({"error": f"Exercise '{exercise_id}' not found"}), 404
     if request.content_type and "multipart/form-data" in request.content_type:
@@ -96,4 +96,6 @@ def insert_voice_lines_sound(exercise_id, frame_index):
         sound_in_base64 = data.get("sound")
         file_name = data.get("file_name")
     insert_voice_lines_sound(exercise_id, frame_index, sound_in_base64, file_name)
-    return jsonify({"error": "Voice config sucessfully inserted."}), 200
+    return jsonify({"error": "Voice config successfully inserted."}), 200
+
+

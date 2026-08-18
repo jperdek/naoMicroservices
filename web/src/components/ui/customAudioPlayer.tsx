@@ -122,7 +122,7 @@ export function CustomAudioPlayer({url, keyID, blob,
 
  const extractFromVideo = async () => {
       const audioBlob = audioPlayer.blob;
-      const audioFile = await fetch(audioPlayer.url);
+     // const audioFile = await fetch(audioPlayer.url);
       const reader = new FileReader();
       reader.readAsDataURL(audioBlob);
       reader.onloadend = async () => {
