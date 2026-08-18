@@ -866,22 +866,13 @@ function FrameCard({
   );
 
   const extractText = (overallMessages: any) => {
-   // function trim(s){ 
-   //      return ( s || '' ).replace( /^\s+|\s+$/g, '' ); 
-   // }
-   // console.log(overallMessages);
-    const entries = Object.keys(overallMessages).length;
     let resultingText = "";
-    for (let i = 0; i < entries - 1; i++) {
-      if (overallMessages[i] !== undefined) {
-        resultingText = resultingText + " " + overallMessages[i];
-      }
+    for (const [key, value] of Object.entries(overallMessages)) {
+          if (key === "extractedText") { continue; }
+          resultingText = resultingText + " " + value;
     }
     return resultingText;
-    //console.log(trim(resultingText));
-    //return trim(resultingText);
   }
-
 
   useEffect(() => {
     async function loadVoiceLines(overallRecordedMessage) {
@@ -899,9 +890,9 @@ function FrameCard({
           .then((data) => {
             console.log(data);
             if (extractText(data) !== "") {
-              const entries = Object.keys(data).length;
-              for (let i = 0; i < entries - 1; i++) {
-                overallRecordedMessage[i] = data[i];
+              for (const [key, value] of Object.entries(data)) {
+                if (key === "extractedText") { continue; }
+                overallRecordedMessage[key] = value;
               }
               overallRecordedMessage["extractedText"] = extractText(data);
               onOverallRecordedMessageChange(overallRecordedMessage);
@@ -921,44 +912,36 @@ function FrameCard({
 
   useEffect(()=>{
     async function fetchAllVoiceLines() {
-    console.log("Callback launched");
-    console.log(toggleText);
+
     if (toggleText && !voiceLinesLoaded) {
       voiceLinesLoaded = true;
-      console.log("{PASSEEEDD");
-      const entries = Object.keys(overallRecordedMessage).length;
       let resultingText = "";
       console.log(overallRecordedMessage);
-      for (let i = 0; i < entries - 1; i++) {
-        console.log(overallRecordedMessage[i]);
-        const fileName = i + ".webm";
-        if (overallRecordedMessage[i] !== undefined) {
-            try {
-              fetch(`${EDITOR_API}/voiceLines/sound/exercise/${exerciseId}/frame/${frame.idx}/${fileName}`, {
-                method: "GET",
-              }).then((response) => {
-                if (response.ok) {
-                  return response.json();
-                }
-                throw new Error("Message not in JSON");
-              })
-              .then((data) => {
-                console.log(data);
-
-                const audioFormat = data["audioFormat"];
-                const audioInBase64 = data["sound"];
-                if (audioFormat === "webm") {
-                  console.log(audioRecorderRef);
-                  audioRecorderRef.current.createCustomAudioPlayerFromBase64(audioInBase64, i);
-                }
-              })
-              .catch((error) => {
-                console.log(error);
-              });
-            } catch(e) {
-              console.log(e);
+      for (const [key, value] of Object.entries(overallRecordedMessage)) {
+        if (key === "extractedText") { continue; }
+        const fileName = key + ".webm";
+        try {
+          fetch(`${EDITOR_API}/voiceLines/sound/exercise/${exerciseId}/frame/${frame.idx}/${fileName}`, {
+            method: "GET",
+          }).then((response) => {
+            if (response.ok) {
+              return response.json();
             }
-          }
+            throw new Error("Message not in JSON");
+          })
+          .then((data) => {
+            const audioFormat = data["audioFormat"];
+            const audioInBase64 = data["sound"];
+            if (audioFormat === "webm") {
+              audioRecorderRef.current.createCustomAudioPlayerFromBase64(audioInBase64);
+            }
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+        } catch(e) {
+          console.log(e);
+        }
         }
       }
     }
@@ -1003,7 +986,7 @@ function FrameCard({
   }
 
   const testVoiceLines = async () => {
-    if (audioRecorderRef.current === null) {
+    if (audioRecorderRef.current !== null) {
       const textConfigToBeSaid = audioRecorderRef.current.getTextConfigFromVoiceLinesToBeSaidByRobot();
     } else {
       if (aggregatedVoiceLinesRef === null) { 
@@ -1136,35 +1119,33 @@ function FrameCard({
                  padding: "30px 30px 30px 30px"}} name="textFromVideo" 
                  value={extractText(overallRecordedMessage) === ""?  overallRecordedMessage["extractedText"] : extractText(overallRecordedMessage)} onChange={(e) => {console.log(e)}} readOnly>
               </textarea>
-              <div className="px-3 pb-3">
-
-              <button
-                onClick={() => onSavingVoiceLines(exerciseId, frame.idx, overallRecordedMessage)}
-                disabled={savingAt === frame.idx}
-                className="w-full flex items-center justify-center gap-1.5 text-[11px] text-gray-400 hover:text-red-500 transition-colors py-1 rounded-md hover:bg-red-50"
-                aria-label="Uložiť hlášky"
+              <div className="flex items-center gap-2" style={{"margin": "10px 10px 10px 10px"}}>
+                <button
+                  onClick={() => onSavingVoiceLines(exerciseId, frame.idx, overallRecordedMessage)}
+                  disabled={savingAt === frame.idx}
+                  className="w-full flex items-center justify-center gap-1.5 text-[11px] text-gray-400 hover:text-red-500 transition-colors py-1 rounded-md hover:bg-red-50"
+                  aria-label="Uložiť hlášky"
+                >
+                {savingAt === frame.idx
+                  ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  : <Save className="h-3.5 w-3.5" />
+                }
+                Uložiť hlášky
+              </button>
+              <Button
+                size="sm"
+                onClick={testVoiceLines}
+                disabled={naoSaying}
+                className="text-primary-foreground"
               >
-              {savingAt === frame.idx
-                ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                : <Save className="h-3.5 w-3.5" />
-              }
-              Uložiť hlášky
-            </button>
-            <Button
-              size="sm"
-              onClick={testVoiceLines}
-              disabled={naoSaying}
-              className="text-primary-foreground"
-            >
-              {naoSaying
-                ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />
-                : <Play className="h-3.5 w-3.5 mr-1.5" />
-              }
-              Povedz
-            </Button>
-          </div>
-        </div>
+                {naoSaying
+                  ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />
+                  : <Play className="h-3.5 w-3.5 mr-1.5" />
+                }
+                Povedz
+              </Button>
             </div>
+          </div>
             <div style={{display: "flex"}}>
               <p className="text-[10px] font-medium text-gray-500 uppercase tracking-wide" style={{ flex: "0 0 calc(100% - 70px)", marginLeft: "10px" }}>Record and speech summary</p>
               

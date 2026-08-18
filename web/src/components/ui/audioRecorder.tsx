@@ -11,18 +11,11 @@ const AudioRecorderComponent = React.forwardRef((props, ref) => {
   useImperativeHandle(ref, () => ({
     createCustomAudioPlayerFromBase64
   }));
-    /*function dictToList(overallRecordedMessage: any) {
-        const array = [];
-        for (let i = 0; i<Object.keys(overallRecordedMessage).length; i++) {
-            array.push({"id": i, "data": overallRecordedMessage[i]});
-        }
-        return array;
-    }*/
+
     const overallRecordedMessage = props.overallRecordedMessage;
     const onOverallRecordedMessageChange = props.onOverallRecordedMessageChange;
     const saveAudioFile = props.saveAudioFile;
-    const [inputList, setInputList] = useState<{id: string, data: any}[]>([]);
-    let index = 0;
+    const [inputList, setInputList] = useState<{id: string, data: any, index: number}[]>([]);
 
     /**
      * Appends two ArrayBuffers into a new one.
@@ -34,7 +27,7 @@ const AudioRecorderComponent = React.forwardRef((props, ref) => {
         const audioCtx = new AudioContext();
         const numberOfChannels = Math.min(buffer1.numberOfChannels, buffer2.numberOfChannels );
         const tmp = audioCtx.createBuffer(numberOfChannels, (buffer1.length + buffer2.length), buffer1.sampleRate );
-        for (var i=0; i<numberOfChannels; i++) {
+        for (let i=0; i<numberOfChannels; i++) {
             const channel = tmp.getChannelData(i);
             channel.set(buffer1.getChannelData(i), 0);
             channel.set(buffer2.getChannelData(i), buffer1.length);
@@ -42,8 +35,7 @@ const AudioRecorderComponent = React.forwardRef((props, ref) => {
         return tmp;
     }
 
-
-    function createCustomAudioPlayerFromBase64(audioInBase64, index) {
+    function createCustomAudioPlayerFromBase64(audioInBase64) {
         const reader = new FileReader();
         
         const byteCharacters = atob(audioInBase64);
@@ -56,23 +48,25 @@ const AudioRecorderComponent = React.forwardRef((props, ref) => {
         reader.onload = function (evt) {
             const audioBuffer = evt.target.result;
             const url = URL.createObjectURL(blob);
-            createCustomAudioPlayer(url, blob, index);
+            createCustomAudioPlayer(url, blob);
         }
         reader.readAsBinaryString(blob);
     }
 
-    function createCustomAudioPlayer(url, blob, index) {
-        const newElement = {id: index, data:<CustomAudioPlayer
-            url={url} keyID={index} key={index} blob={blob} overallRecordedMessage={overallRecordedMessage}
-             saveAudioFile={saveAudioFile} onOverallRecordedMessageChange={onOverallRecordedMessageChange}/>};
+    function createCustomAudioPlayer(url, blob) {
+        const playerIdentifier = crypto.randomUUID().substring(0, 8);
+        const newElement = {id: playerIdentifier, index: inputList.length, data:<CustomAudioPlayer
+            url={url} keyID={inputList.length + "_" + playerIdentifier} key={playerIdentifier} blob={blob} 
+            overallRecordedMessage={overallRecordedMessage}
+            saveAudioFile={saveAudioFile} onOverallRecordedMessageChange={onOverallRecordedMessageChange}/>};
 
         setInputList(inputList => [...inputList, newElement]);
         inputList.push(newElement);
     }
 
     //chunks cannot be processed - for example to determine duration
-    function handleAudioStop(data, index): void {
-        createCustomAudioPlayer(data.url, data.blob, index);
+    function handleAudioStop(data): void {
+        createCustomAudioPlayer(data.url, data.blob);
 
         handleReset();
     }
@@ -84,7 +78,6 @@ const AudioRecorderComponent = React.forwardRef((props, ref) => {
             return;
         }
         console.log("Merging....");
-        console.log(inputList.length);
         const audioContext = new AudioContext();
         let concatenatedBuffer = null;
         let inputElement = null;
@@ -98,13 +91,11 @@ const AudioRecorderComponent = React.forwardRef((props, ref) => {
                         concatenatedBuffer = result;
                     } else {
                         concatenatedBuffer = appendBuffer(concatenatedBuffer, result);
-                        //console.log(concatenatedBuffer);
                         audioBufferToWebMBlob(audioCtx, concatenatedBuffer).then((blob) => {
-                           let assignedIndexIdentifier = 0;
-                           if (inputList !== undefined) { assignedIndexIdentifier = inputList.length; }
-                            console.log(assignedIndexIdentifier);
+                           const playerIdentifier = crypto.randomUUID().substring(0, 8);
                            const url = window.URL.createObjectURL(blob);
-                            inputElement = {id: assignedIndexIdentifier, data:<CustomAudioPlayer url={url} keyID={assignedIndexIdentifier} key={assignedIndexIdentifier} blob={blob}
+                            inputElement = {id: playerIdentifier, index: inputList.length, data:<CustomAudioPlayer url={url} 
+                            keyID={inputList.length + "_" + playerIdentifier} key={playerIdentifier} blob={blob} 
                             overallRecordedMessage={overallRecordedMessage} saveAudioFile={saveAudioFile}
                             onOverallRecordedMessageChange={onOverallRecordedMessageChange}/>};
 
@@ -120,11 +111,9 @@ const AudioRecorderComponent = React.forwardRef((props, ref) => {
     }
 
     function handleAudioUpload(file): void {
-         //console.log(file);
     }
 
     function handleCountDown(data): void {
-        //console.log(data);
     }
 
     function handleReset(): void {
@@ -158,10 +147,10 @@ const AudioRecorderComponent = React.forwardRef((props, ref) => {
         <div>
             <Recorder
                 record={true}
-                title={"New recording"}
+                title={"Voice line recording"}
                 audioURL={state.audioDetails.url}
                 showUIAudio
-                handleAudioStop={data => {handleAudioStop(data, index); index += 1;}}
+                handleAudioStop={data => {handleAudioStop(data)}}
                 handleAudioUpload={data => handleAudioUpload(data)}
                 handleCountDown={data => handleCountDown(data)}
                 handleReset={() => handleReset()}
@@ -169,7 +158,7 @@ const AudioRecorderComponent = React.forwardRef((props, ref) => {
             />
             {rows}
             <div>
-                <button onClick={() => {mergeRecordedFiles(); index += 1; }}>Merge</button>
+                <button onClick={() => {mergeRecordedFiles() }}>Merge</button>
             </div>
         </div>
     );

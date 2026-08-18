@@ -23,8 +23,6 @@ export function CustomAudioPlayer({url, keyID, blob,
       setDuration(result.duration);
       return result.duration.toString();
     }
-    //console.log(overallRecordedMessage);
-    //setTextAreaText(overallRecordedMessage[keyID]);
     endTime(blob);
   }, [blob, duration]);
 
@@ -33,7 +31,7 @@ export function CustomAudioPlayer({url, keyID, blob,
       playerRef.current.load(); // Force browser to load new file
       playerRef.current.play().catch(err => console.log("Playback blocked:", err));
     }
-  }, [audioPlayer]); // Runs every time trackUrl changes
+  }, [audioPlayer]); 
 
 
   const handlePlay = () => {
@@ -57,8 +55,6 @@ export function CustomAudioPlayer({url, keyID, blob,
     const audioCtx = new AudioContext();
     const arrayBuffer = await blob.arrayBuffer();
     const result = await audioCtx.decodeAudioData(arrayBuffer);
-    console.log(result.duration);
-    
     return result.duration.toString();
   }
 
@@ -104,8 +100,7 @@ export function CustomAudioPlayer({url, keyID, blob,
                   console.log(clippedBuffer);
                     audioBufferToWebMBlob(audioCtx, clippedBuffer).then((blob) => {
                         const url = window.URL.createObjectURL(blob);
-                        //inputElement = {id: index, data:<CustomAudioPlayer url={url} key={inputList.length + 1} keyID={inputList.length + 1} blob={blob} />};
-                        
+           
                         setAudioPlayer(url, blob);
                         audioPlayer.url = url;
                         audioPlayer.blob = blob;
@@ -114,7 +109,6 @@ export function CustomAudioPlayer({url, keyID, blob,
                         playerRef.current?.pause();
                         playerRef.current?.load();
                         playerRef.current?.play();
-                        console.log(audioPlayer.url);
                     });
                 });
           });
@@ -136,16 +130,12 @@ export function CustomAudioPlayer({url, keyID, blob,
         });
         if (!res.ok) throw new Error(`Upload failed: HTTP ${res.status}`);
         const data = await res.json();
-        console.log(data);
         const translation: string = data.translation;
         setTextAreaText(translation);
 
-        if (keyID === undefined) { keyID = 0; };
         overallRecordedMessage[keyID] = translation;
-
         saveAudioFile(audioInBase64, keyID + ".webm");
         overallRecordedMessage["extractedText"] = translation;
-        console.log(overallRecordedMessage);
         onOverallRecordedMessageChange(overallRecordedMessage);
       };   
  }
