@@ -38,7 +38,7 @@ const AudioRecorderComponent = React.forwardRef((props, ref) => {
                 // Pad with leading zeros to ensure it is always 4 digits
                 return '\\u' + hex.padStart(4, '0');
             }).join('');
-            }
+        }
 
         const finalTextConfig = {};
         finalTextConfig["lang"] = languageVoice;
@@ -50,18 +50,9 @@ const AudioRecorderComponent = React.forwardRef((props, ref) => {
             const index = (j + "").padStart(3, "0");
             const voiceLinesConfig = {};
             // text To Be Said By Robot
-            console.log(overallRecordedMessage["voice_lines_configs"]);
-            console.log(index);
             const recorderConfig = overallRecordedMessage["voice_lines_configs"][index];
             if (recorderConfig === undefined) { continue; }
-            voiceLinesConfig["translation"] = escape(recorderConfig["translation"]);
-            const encoder = new TextEncoder(); // Defaults to UTF-8
-            const bytes = encoder.encode(recorderConfig["translation"]);
-            const decoder = new TextDecoder("ascii");
-            const originalText = decoder.decode(bytes).replace("!", ".");
-            console.log(voiceLinesConfig["translation"]);
-            console.log(originalText);
-            //voiceLinesConfig["translation"] = originalText;
+            voiceLinesConfig["translation"] = recorderConfig["translation"];
             if (recorderConfig["wait"] !== undefined) {
                 voiceLinesConfig["wait"] = recorderConfig["wait"];
             }

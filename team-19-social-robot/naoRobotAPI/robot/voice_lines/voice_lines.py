@@ -25,7 +25,6 @@ def set_voice_lines(voice_lines_config):
     for _, voice_line_config in voice_lines_config["voice_lines_configs"].items():
         if "wait" in voice_line_config and voice_line_config["wait"]:
             time.sleep(voice_line_config["wait"])
-        print(str(voice_line_config["translation"]))
-        text = str(voice_line_config["translation"].decode('unicode_escape'))
-        g.speech_proxy.say(text)
+        text = unicode(voice_line_config["translation"]).encode('utf8', 'replace')
+        g.speech_proxy.say(text, "Czech")
  
