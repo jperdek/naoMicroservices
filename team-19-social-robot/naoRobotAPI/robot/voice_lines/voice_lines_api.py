@@ -1,7 +1,7 @@
 import json
 from flask import Blueprint, request
 
-from voice_lines import set_voice_line
+from voice_lines import set_voice_lines
 
 
 def application_json_response(payload, status):

@@ -7,12 +7,13 @@ const LOCAL = true;
 const TO_TEXT_API = LOCAL? "http://localhost:9901" : "";
 
 
-export function CustomAudioPlayer({url, keyID, blob,
+export function CustomAudioPlayer({url, keyID, index, blob, defaultText,
                             overallRecordedMessage, onOverallRecordedMessageChange, saveAudioFile}) {
   const playerRef = useRef<any>(null);
   const [duration, setDuration] = useState(0.0);
   const [audioPlayer, setAudioPlayer] = useState({"url": url,"blob": blob});
-  const [textAreaText, setTextAreaText] = useState("Text to be said by NAO. Possibly loaded from video.");
+  const [textAreaText, setTextAreaText] = useState(defaultText? defaultText: "Text to be said by NAO. Possibly loaded from video.");
+  const [waitBefore, setWaitBefore] = useState(0);
 
   useEffect((): string => {
     async function endTime(blob) {
@@ -114,7 +115,7 @@ export function CustomAudioPlayer({url, keyID, blob,
           });
   }
 
- const extractFromVideo = async () => {
+  const extractFromVideo = async () => {
       const audioBlob = audioPlayer.blob;
      // const audioFile = await fetch(audioPlayer.url);
       const reader = new FileReader();
@@ -133,18 +134,32 @@ export function CustomAudioPlayer({url, keyID, blob,
         const translation: string = data.translation;
         setTextAreaText(translation);
 
-        overallRecordedMessage[keyID] = translation;
-        saveAudioFile(audioInBase64, keyID + ".webm");
+        if (overallRecordedMessage["voice_lines_configs"] === undefined) {
+            overallRecordedMessage["voice_lines_configs"] = {};
+        }
+        const fileName = keyID + ".webm";
+        overallRecordedMessage["voice_lines_configs"][(index + "").padStart(3, "0")] = 
+            {"translation": translation, "index": index, "fileName": fileName};
+        saveAudioFile(audioInBase64, fileName);
         overallRecordedMessage["extractedText"] = translation;
         onOverallRecordedMessageChange(overallRecordedMessage);
       };   
- }
+  }
+
+  const processWaitBeforeChange = (value) => {
+    setWaitBefore(value);
+    overallRecordedMessage["voice_lines_configs"][(index + "").padStart(3, "0")]["wait"] = value;
+  }
 
   return (
     <div>
       <audio ref={playerRef} src={audioPlayer.url} autoPlay preload="auto" controls>
         <source src={audioPlayer.url} type="audio/webm"/>
       </audio>
+      <span style={{display: "inner-flex", alignItems: "center", position: "relative", width: "17%", height: "50px"}}>
+          <input value={waitBefore} onChange={e => processWaitBeforeChange(e.target.value)} name="waitBefore" step="1" type="number" defaultValue="0" style={{width: "100%", height: "50px"}}/>
+          <span style={{position: "absolute", top: "13px",  height: "50px", alignSelf: "center"}}>s</span>
+      </span>    
       <div style={{display: "flex", flexDirection: "row", justifyItems: "center", justifyContent: "center", height: "75px"}}>
           <button style={{width: "125px", height: "50px"}} onClick={handlePlay}>Play</button>
           <button style={{width: "125px", height: "50px"}} onClick={handlePause}>Pause</button>

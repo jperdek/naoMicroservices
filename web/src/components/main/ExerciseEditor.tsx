@@ -867,16 +867,19 @@ function FrameCard({
 
   const extractText = (overallMessages: any) => {
     let resultingText = "";
-    for (const [key, value] of Object.entries(overallMessages)) {
-          if (key === "extractedText") { continue; }
-          resultingText = resultingText + " " + value;
+    if (overallMessages["voice_lines_configs"] !== undefined) {
+      for (const [key, value] of Object.entries(overallMessages["voice_lines_configs"])) {
+          if (value["translation"] !== undefined) { 
+              resultingText = resultingText + " " + value["translation"];
+          }
+      }
     }
     return resultingText;
   }
 
   useEffect(() => {
     async function loadVoiceLines(overallRecordedMessage) {
-      if(!overallRecordedMessage || !configLoaded) {
+      if (!overallRecordedMessage || !configLoaded) {
        configLoaded = true;
         try {
           fetch(`${EDITOR_API}/voiceLines/config/exercise/${exerciseId}/frame/${frame.idx}`, {
@@ -888,15 +891,16 @@ function FrameCard({
             throw new Error("Message not in JSON");
           })
           .then((data) => {
-            console.log(data);
             if (extractText(data) !== "") {
-              for (const [key, value] of Object.entries(data)) {
-                if (key === "extractedText") { continue; }
-                overallRecordedMessage[key] = value;
-              }
-              overallRecordedMessage["extractedText"] = extractText(data);
-              onOverallRecordedMessageChange(overallRecordedMessage);
-              console.log(overallRecordedMessage);
+                for (const [key, value] of Object.entries(data["voice_lines_configs"])) {
+                  if (overallRecordedMessage["voice_lines_configs"] === undefined) {
+                      overallRecordedMessage["voice_lines_configs"] = {};
+                  }
+                  overallRecordedMessage["voice_lines_configs"][key] = value;
+                }
+                overallRecordedMessage["extractedText"] = extractText(data);
+                console.log(overallRecordedMessage["extractedText"]);
+                onOverallRecordedMessageChange(overallRecordedMessage);
             } 
           })
           .catch((error) => {
@@ -916,33 +920,34 @@ function FrameCard({
     if (toggleText && !voiceLinesLoaded) {
       voiceLinesLoaded = true;
       let resultingText = "";
-      console.log(overallRecordedMessage);
-      for (const [key, value] of Object.entries(overallRecordedMessage)) {
-        if (key === "extractedText") { continue; }
-        const fileName = key + ".webm";
-        try {
-          fetch(`${EDITOR_API}/voiceLines/sound/exercise/${exerciseId}/frame/${frame.idx}/${fileName}`, {
-            method: "GET",
-          }).then((response) => {
-            if (response.ok) {
-              return response.json();
-            }
-            throw new Error("Message not in JSON");
-          })
-          .then((data) => {
-            const audioFormat = data["audioFormat"];
-            const audioInBase64 = data["sound"];
-            if (audioFormat === "webm") {
-              audioRecorderRef.current.createCustomAudioPlayerFromBase64(audioInBase64);
-            }
-          })
-          .catch((error) => {
-            console.log(error);
-          });
-        } catch(e) {
-          console.log(e);
+      if (overallRecordedMessage["voice_lines_configs"] !== undefined ) {
+        for (const [key, value] of Object.entries(overallRecordedMessage["voice_lines_configs"])) {
+          console.log(key);
+          console.log(value["fileName"]);
+          try {
+            fetch(`${EDITOR_API}/voiceLines/sound/exercise/${exerciseId}/frame/${frame.idx}/${value["fileName"]}`, {
+              method: "GET",
+            }).then((response) => {
+              if (response.ok) {
+                return response.json();
+              }
+              throw new Error("Message not in JSON");
+            })
+            .then((data) => {
+              const audioFormat = data["audioFormat"];
+              const audioInBase64 = data["sound"];
+              if (audioFormat === "webm") {
+                audioRecorderRef.current.createCustomAudioPlayerFromBase64(audioInBase64, value["translation"]);
+              }
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+          } catch(e) {
+            console.log(e);
+          }
         }
-        }
+      }
       }
     }
      fetchAllVoiceLines(); 
@@ -965,7 +970,6 @@ function FrameCard({
 
   const onSavingVoiceLines = async (exerciseId: number, frameIdx: number, overallRecordedMessage: any) => {
     setSavingVoiceLinesAt(frameIdx);
-    console.log(overallRecordedMessage);
     try {
       const res = await fetch(`${EDITOR_API}/voiceLines/config/exercise/${exerciseId}/frame/${frameIdx}`, {
         method: "POST",
@@ -985,16 +989,41 @@ function FrameCard({
     }
   }
 
+
+    const onRobotSay = async (textConfigToBeSaid) => {
+      setNaoSaying(true);
+      console.log(textConfigToBeSaid);
+      try {
+        const res = await fetch(`${ROBOT_API}/voiceLines/applyVoiceLine`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            "voice_lines": textConfigToBeSaid
+          })
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        showStatus("success", "Robot povedal.");
+      } catch (err) {
+        showStatus("error", err instanceof Error ? err.message : "Uloženie hlášok zlyhalo");
+      } finally {
+        setNaoSaying(null);
+      }
+    }
+
+
   const testVoiceLines = async () => {
     if (audioRecorderRef.current !== null) {
       const textConfigToBeSaid = audioRecorderRef.current.getTextConfigFromVoiceLinesToBeSaidByRobot();
+      onRobotSay(textConfigToBeSaid);
     } else {
       if (aggregatedVoiceLinesRef === null) { 
         throw new Exception("HTML Textarea not initialized.");
         return;
       }
       const textToBeSaidByRobot = aggregatedVoiceLinesRef.current.value;
-      console.log(textToBeSaidByRobot);
+      onRobotSay(textConfigToBeSaid);
     }
   }
 

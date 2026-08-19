@@ -6,16 +6,71 @@ import { Recorder } from 'react-voice-recorder';
 import 'react-voice-recorder/dist/index.css';
 import { audioBufferToWebMBlob } from "./webmAudio";
 import { CustomAudioPlayer } from './customAudioPlayer';
-
+import { Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectScrollDownButton,
+  SelectScrollUpButton,
+  SelectSeparator,
+  SelectTrigger,
+  SelectValue} from '@/components/ui/select'
+  
 const AudioRecorderComponent = React.forwardRef((props, ref) => {
   useImperativeHandle(ref, () => ({
-    createCustomAudioPlayerFromBase64
+    createCustomAudioPlayerFromBase64,
+    getTextConfigFromVoiceLinesToBeSaidByRobot
   }));
 
     const overallRecordedMessage = props.overallRecordedMessage;
     const onOverallRecordedMessageChange = props.onOverallRecordedMessageChange;
     const saveAudioFile = props.saveAudioFile;
     const [inputList, setInputList] = useState<{id: string, data: any, index: number}[]>([]);
+    const [languageVoice, setLanguageVoice] = useState("en");
+    const [speedVoice, setSpeedVoice] = useState(100);
+
+    function getTextConfigFromVoiceLinesToBeSaidByRobot(): string {
+        function encodeToUnicodeEscape(str) {
+            return str.split('').map(char => {
+                // Get the character code and convert it to a hex string
+                const hex = char.charCodeAt(0).toString(16).toUpperCase();
+                // Pad with leading zeros to ensure it is always 4 digits
+                return '\\u' + hex.padStart(4, '0');
+            }).join('');
+            }
+
+        const finalTextConfig = {};
+        finalTextConfig["lang"] = languageVoice;
+        finalTextConfig["speed"] = speedVoice;
+        console.log(inputList);
+        const voiceLinesConfigs = {};
+        for(let j=0; j<inputList.length; j++) {
+            const keyID = inputList[j].data.props.keyID;
+            const index = (j + "").padStart(3, "0");
+            const voiceLinesConfig = {};
+            // text To Be Said By Robot
+            console.log(overallRecordedMessage["voice_lines_configs"]);
+            console.log(index);
+            const recorderConfig = overallRecordedMessage["voice_lines_configs"][index];
+            if (recorderConfig === undefined) { continue; }
+            voiceLinesConfig["translation"] = escape(recorderConfig["translation"]);
+            const encoder = new TextEncoder(); // Defaults to UTF-8
+            const bytes = encoder.encode(recorderConfig["translation"]);
+            const decoder = new TextDecoder("ascii");
+            const originalText = decoder.decode(bytes).replace("!", ".");
+            console.log(voiceLinesConfig["translation"]);
+            console.log(originalText);
+            //voiceLinesConfig["translation"] = originalText;
+            if (recorderConfig["wait"] !== undefined) {
+                voiceLinesConfig["wait"] = recorderConfig["wait"];
+            }
+            voiceLinesConfigs[index] = voiceLinesConfig
+        }
+        finalTextConfig["voice_lines_configs"] = voiceLinesConfigs;
+        return finalTextConfig;
+    }
+
 
     /**
      * Appends two ArrayBuffers into a new one.
@@ -35,7 +90,7 @@ const AudioRecorderComponent = React.forwardRef((props, ref) => {
         return tmp;
     }
 
-    function createCustomAudioPlayerFromBase64(audioInBase64) {
+    function createCustomAudioPlayerFromBase64(audioInBase64, defaultText) {
         const reader = new FileReader();
         
         const byteCharacters = atob(audioInBase64);
@@ -48,16 +103,16 @@ const AudioRecorderComponent = React.forwardRef((props, ref) => {
         reader.onload = function (evt) {
             const audioBuffer = evt.target.result;
             const url = URL.createObjectURL(blob);
-            createCustomAudioPlayer(url, blob);
+            createCustomAudioPlayer(url, blob, defaultText);
         }
         reader.readAsBinaryString(blob);
     }
 
-    function createCustomAudioPlayer(url, blob) {
+    function createCustomAudioPlayer(url, blob, defaultText) {
         const playerIdentifier = crypto.randomUUID().substring(0, 8);
         const newElement = {id: playerIdentifier, index: inputList.length, data:<CustomAudioPlayer
-            url={url} keyID={inputList.length + "_" + playerIdentifier} key={playerIdentifier} blob={blob} 
-            overallRecordedMessage={overallRecordedMessage}
+            index={inputList.length}  url={url} keyID={playerIdentifier} key={playerIdentifier} blob={blob} 
+            overallRecordedMessage={overallRecordedMessage} defaultText={defaultText}
             saveAudioFile={saveAudioFile} onOverallRecordedMessageChange={onOverallRecordedMessageChange}/>};
 
         setInputList(inputList => [...inputList, newElement]);
@@ -94,8 +149,8 @@ const AudioRecorderComponent = React.forwardRef((props, ref) => {
                         audioBufferToWebMBlob(audioCtx, concatenatedBuffer).then((blob) => {
                            const playerIdentifier = crypto.randomUUID().substring(0, 8);
                            const url = window.URL.createObjectURL(blob);
-                            inputElement = {id: playerIdentifier, index: inputList.length, data:<CustomAudioPlayer url={url} 
-                            keyID={inputList.length + "_" + playerIdentifier} key={playerIdentifier} blob={blob} 
+                            inputElement = {id: playerIdentifier, data:<CustomAudioPlayer url={url} 
+                            index={inputList.length} keyID={playerIdentifier} key={playerIdentifier} blob={blob} 
                             overallRecordedMessage={overallRecordedMessage} saveAudioFile={saveAudioFile}
                             onOverallRecordedMessageChange={onOverallRecordedMessageChange}/>};
 
@@ -156,6 +211,36 @@ const AudioRecorderComponent = React.forwardRef((props, ref) => {
                 handleReset={() => handleReset()}
                 mimeTypeToUseWhenRecording={`audio/webm`} // For specific mimetype.
             />
+            <div>
+                <span style={{display: "inner-flex", alignItems: "center", position: "relative", width: "20%", height: "50px"}}>
+                    <Select>
+                        <SelectTrigger className="SelectTrigger" aria-label="Food">
+                            <SelectValue placeholder="Select a language" />
+                        </SelectTrigger>
+  
+                        <SelectContent className="SelectContent">
+                            <SelectScrollUpButton className="SelectScrollButton">
+                            </SelectScrollUpButton>
+                                <SelectGroup>
+                                    <SelectLabel className="SelectLabel">Europa</SelectLabel>
+                                    <SelectItem value="en">English</SelectItem>
+                                    <SelectItem value="cz">Česky</SelectItem>
+                                    <SelectItem value="cz">Slovensky</SelectItem>
+                                    <SelectItem value="es">Espana</SelectItem>
+                                    <SelectItem value="de">Deutch</SelectItem>
+                                    <SelectItem value="it">Italiano</SelectItem>
+                                </SelectGroup>
+                                <SelectSeparator className="SelectSeparator" />
+                            <SelectScrollDownButton className="SelectScrollButton">
+                            </SelectScrollDownButton>
+                        </SelectContent>
+                    </Select>
+                </span>
+                <span style={{display: "inner-flex", alignItems: "center", position: "relative", width: "80%", height: "50px"}}>
+                    <input name="langSpeed" step="1" type="range" defaultValue="0" style={{width: "100%", height: "50px"}}/>
+     
+                </span>   
+            </div>
             {rows}
             <div>
                 <button onClick={() => {mergeRecordedFiles() }}>Merge</button>
