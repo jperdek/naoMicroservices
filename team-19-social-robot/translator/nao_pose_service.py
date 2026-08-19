@@ -32,6 +32,7 @@ LOCAL = os.environ.get('LOCAL', True)
 if LOCAL:
     POSE_API_URL = "http://localhost:6001/media_pipe_pose/pose_from_image"
     SET_POSE_URL = "http://localhost:5000/setting_pose/setPose"
+    VOICE_LINES_URL = "http://localhost:5000/voiceLines/applyVoiceLine"
     EXERCISE_CONFIG_URL = os.environ.get("EXERCISE_CONFIG_URL", "http://localhost:7001")
 else:
     POSE_API_URL = "http://skeletonfinderapi:6001/media_pipe_pose/pose_from_image"
@@ -57,7 +58,6 @@ CORS(app) #added
 # =========================
 # HELPERS
 # =========================
-
 def call_pose_service(container_path: str):
     """
     Call the MediaPipe pose_from_image API with a file path
@@ -117,6 +117,16 @@ def call_nao_set_pose(angles):
     resp.raise_for_status()
     return resp.json()
 
+
+def call_nao_voice_lines(voice_lines_configs):
+    """
+    Call NAO to say voice line.
+    """
+    payload = {"voice_lines": voice_lines_configs}
+    resp = requests.post(VOICE_LINES_URL, json=payload, timeout=15)
+    resp.raise_for_status()
+    return resp.json()
+    
 
 # =========================
 # ROUTES
@@ -387,12 +397,18 @@ def exercise_run(exercise_id):
     results = []
     for rep in range(repetitions):
         for frame in frames:
+            if voice_lines := frame.get("voice_lines"):
+                try:
+                    nao_response = call_nao_voice_lines(voice_lines)
+                    results.append({"rep": rep, "type": "pose", "frame_index": frame.get("frame_index"), "status": "ok"})
+                except requests.RequestException as e:
+                    results.append({"rep": rep, "type": "voice", "frame_index": frame.get("frame_index"), "status": "error", "detail": str(e)})
             angles = frame.get("nao_angles", [])
             try:
                 nao_response = call_nao_set_pose(angles)
-                results.append({"rep": rep, "frame_index": frame.get("frame_index"), "status": "ok"})
+                results.append({"rep": rep, "type": "pose", "frame_index": frame.get("frame_index"), "status": "ok"})
             except requests.RequestException as e:
-                results.append({"rep": rep, "frame_index": frame.get("frame_index"), "status": "error", "detail": str(e)})
+                results.append({"rep": rep, "type": "pose", "frame_index": frame.get("frame_index"), "status": "error", "detail": str(e)})
 
     return jsonify({
         "exercise_id": exercise_id,
