@@ -1,11 +1,14 @@
 
 import ReactDOM from "react-dom/client";
 import React, { useState, forwardRef, useImperativeHandle } from "react";
+import { standardButtonHeight} from "@/components/styles/styles";
 
 import { Recorder } from 'react-voice-recorder';
 import 'react-voice-recorder/dist/index.css';
 import { audioBufferToWebMBlob } from "./webmAudio";
 import { CustomAudioPlayer } from './customAudioPlayer';
+import { Button } from "@/components/ui/button";
+
 import { Select,
   SelectContent,
   SelectGroup,
@@ -29,6 +32,7 @@ const AudioRecorderComponent = React.forwardRef((props, ref) => {
     const [inputList, setInputList] = useState<{id: string, data: any}[]>([]);
     const [languageVoice, setLanguageVoice] = useState("en");
     const [speedVoice, setSpeedVoice] = useState(100);
+    
 
     function getTextConfigFromVoiceLinesToBeSaidByRobot(): string {
         const finalTextConfig = {};
@@ -223,9 +227,10 @@ const AudioRecorderComponent = React.forwardRef((props, ref) => {
                 </span>   
             </span>
             {rows}
+            { rows.length > 1 &&
             <div>
-                <button onClick={() => {mergeRecordedFiles() }}>Merge</button>
-            </div>
+                <Button onClick={() => {mergeRecordedFiles() }} style={{width: "80%", margin: "10px 10% 10px 10%", fontWeight: "bold", color: "white", borderRadius: "25px", fontSize: "large", marginTop: "1.5rem", fontWeight: "bold", height: standardButtonHeight}}>Zlúčiť všetky</Button>
+            </div> } 
         </div>
     );
 });

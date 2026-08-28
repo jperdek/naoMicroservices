@@ -1,7 +1,8 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import { audioBufferToWebMBlob } from "./webmAudio";
 import { standardButtonColor, standardButtonHeight, secondaryButtonColor} from "@/components/styles/styles";
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
+import { Trash2 } from "lucide-react";
 
 const LOCAL = true; 
 // ── API config ────────────────────────────────────────────────────
@@ -11,10 +12,12 @@ const TO_TEXT_API = LOCAL? "http://localhost:9901" : "";
 export function CustomAudioPlayer({url, keyID, index, blob, defaultText,
                             overallRecordedMessage, onOverallRecordedMessageChange, saveAudioFile}) {
   const playerRef = useRef<any>(null);
+  const audioRef = useRef(null);
   const [duration, setDuration] = useState(0.0);
   const [audioPlayer, setAudioPlayer] = useState({"url": url,"blob": blob});
   const [textAreaText, setTextAreaText] = useState(defaultText? defaultText: "Text to be said by NAO. Possibly loaded from video.");
   const [waitBefore, setWaitBefore] = useState(0);
+  const [deleting, setDeleting]   = useState<string | null>(null);
 
   useEffect((): string => {
     async function endTime(blob) {
@@ -147,13 +150,34 @@ export function CustomAudioPlayer({url, keyID, index, blob, defaultText,
       };   
   }
 
+  // ── delete recorded voice line if saved ──────────────────────────────────────────────
+  // DELETE /exercise/<id>/frame/<idx>
+  const onDelete = useCallback(async () => {
+     if (!audioRef) return;
+    audioRef.current.remove();
+    if (!keyID) return;
+    setDeleting(frameIdx);
+    try {
+      const res = await fetch(`${EDITOR_API}/exercise/${keyID}/frame/${frameIdx}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      // showStatus("success", "Snímka odstránená.");
+    } catch (err) {
+      //showStatus("error", err instanceof Error ? err.message : "Odstránenie zlyhalo");
+    } finally {
+      ReactDOM.unmountComponentAtNode(ReactDOM.findDOMNode(this).parentNode);
+      setDeleting(null);
+    }
+  }, [keyID, index]);
+
   const processWaitBeforeChange = (value) => {
     setWaitBefore(value);
     overallRecordedMessage["voice_lines_configs"][(index + "").padStart(3, "0")]["wait"] = value;
   }
 
   return (
-    <div style={{margin: "1.5rem 0 1.5rem 0", backgroundImage: "url(/voiceLine.svg)", backgroundBlendMode: "luminosity", backgroundSize: "350px", backgroundPositionX: "110px", backgroundPositionY: "230px", backgroundRepeat: "no-repeat", border: "2px dashed gray", borderRadius: "30px", padding: "1rem 0.5rem 1rem 0.5rem"}}>
+    <div ref={audioRef} style={{margin: "1.5rem 0 1.5rem 0", backgroundImage: "url(/voiceLine.svg)", backgroundBlendMode: "luminosity", backgroundSize: "350px", backgroundPositionX: "110px", backgroundPositionY: "230px", backgroundRepeat: "no-repeat", border: "2px dashed gray", borderRadius: "30px", padding: "1rem 0.5rem 1rem 0.5rem"}}>
       <p className="text-[20px] font-large text-gray-500 uppercase tracking-wide" style={{ display: "flex", justifyContent: "center", width: "100%", marginLeft: "10px", marginBottom: "1.5rem", alignText: "center", fontWeight: "bold" }}>Nahraná Hláška</p>
         
       <audio ref={playerRef} src={audioPlayer.url} autoPlay preload="auto" controls style={{display: "flex", justifySelf: "center", width: "90%", margin: "auto 5%"}}>
@@ -256,7 +280,7 @@ export function CustomAudioPlayer({url, keyID, index, blob, defaultText,
             </span>
           </span>
           <span style={{display: "table", width: "calc(83% - 250px)", margin: "0 auto"}}></span>
-          <input type="submit" value="Clip" style={{width: "175px", height: "50px", fontSize: "large", fontWeight: "bold", backgroundColor: secondaryButtonColor, borderRadius: "25px"}} />
+          <input type="submit" value="Orezať" style={{width: "175px", height: "50px", fontSize: "large", fontWeight: "bold", backgroundColor: secondaryButtonColor, borderRadius: "25px"}} />
         </div>
         
       </form>
@@ -264,7 +288,22 @@ export function CustomAudioPlayer({url, keyID, index, blob, defaultText,
       <textarea style={{width: "100%", height: "100px", border: "1px solid black", borderRadius: "25px", padding: "30px 30px 30px 30px"}} name="textFromVideo" value={textAreaText} onChange={e => {}}>
   
       </textarea>
-      <Button style={{width: "80%", margin: "10px 10% 10px 10%", fontWeight: "bold", color: "white", borderRadius: "25px", fontSize: "large", marginTop: "1.5rem", fontWeight: "bold", height: standardButtonHeight}} onClick={extractFromVideo}>Extrahuj text z audia</Button>
+      <div style={{display: "flex", justifyContent: "space-between"}}>
+            <button
+              onClick={onDelete}
+              disabled={deleting}
+              className="w-full flex items-center justify-center gap-1.5 text-[11px] text-gray-400 hover:text-red-500 transition-colors py-1 rounded-md hover:bg-red-50"
+              aria-label="Odstrániť hlašku"
+              style={{width: "225px", height: "50px", alignSelf: "center", margin: "10px 8% 10px 25px"}}
+            >
+            {deleting
+              ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              : <Trash2 className="h-3.5 w-3.5" />
+            }
+            Odstrániť
+          </button>
+        <Button style={{width: "55%", margin: "10px 25px 10px 8%", fontWeight: "bold", color: "white", borderRadius: "25px", fontSize: "large", marginTop: "1.5rem", fontWeight: "bold", height: standardButtonHeight}} onClick={extractFromVideo}>Extrahuj text z audia</Button>
+      </div>
     </div>
   );
 }
