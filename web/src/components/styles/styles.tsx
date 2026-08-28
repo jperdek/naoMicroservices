@@ -1,5 +1,5 @@
 const standardButtonColor = "#185fec"
-const standardButtonHeight = "75px";
+const standardButtonHeight = "45px";
 
 const secondaryButtonColor = "#ff7bac"
 const secondaryButtonHeight = "75px";

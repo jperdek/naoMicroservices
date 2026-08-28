@@ -26,24 +26,14 @@ const AudioRecorderComponent = React.forwardRef((props, ref) => {
     const overallRecordedMessage = props.overallRecordedMessage;
     const onOverallRecordedMessageChange = props.onOverallRecordedMessageChange;
     const saveAudioFile = props.saveAudioFile;
-    const [inputList, setInputList] = useState<{id: string, data: any, index: number}[]>([]);
+    const [inputList, setInputList] = useState<{id: string, data: any}[]>([]);
     const [languageVoice, setLanguageVoice] = useState("en");
     const [speedVoice, setSpeedVoice] = useState(100);
 
     function getTextConfigFromVoiceLinesToBeSaidByRobot(): string {
-        function encodeToUnicodeEscape(str) {
-            return str.split('').map(char => {
-                // Get the character code and convert it to a hex string
-                const hex = char.charCodeAt(0).toString(16).toUpperCase();
-                // Pad with leading zeros to ensure it is always 4 digits
-                return '\\u' + hex.padStart(4, '0');
-            }).join('');
-        }
-
         const finalTextConfig = {};
         finalTextConfig["lang"] = languageVoice;
         finalTextConfig["speed"] = speedVoice;
-        console.log(inputList);
         const voiceLinesConfigs = {};
         for(let j=0; j<inputList.length; j++) {
             const keyID = inputList[j].data.props.keyID;
@@ -101,7 +91,7 @@ const AudioRecorderComponent = React.forwardRef((props, ref) => {
 
     function createCustomAudioPlayer(url, blob, defaultText) {
         const playerIdentifier = crypto.randomUUID().substring(0, 8);
-        const newElement = {id: playerIdentifier, index: inputList.length, data:<CustomAudioPlayer
+        const newElement = {id: playerIdentifier, data:<CustomAudioPlayer
             index={inputList.length}  url={url} keyID={playerIdentifier} key={playerIdentifier} blob={blob} 
             overallRecordedMessage={overallRecordedMessage} defaultText={defaultText}
             saveAudioFile={saveAudioFile} onOverallRecordedMessageChange={onOverallRecordedMessageChange}/>};
@@ -190,7 +180,7 @@ const AudioRecorderComponent = React.forwardRef((props, ref) => {
     const rows = [];
     for (let i=0; i<inputList.length; i++) { rows.push(inputList[i].data); }
     return (
-        <div>
+        <div style={{width: "100%"}}>
             <Recorder
                 record={true}
                 title={"Voice line recording"}
@@ -202,7 +192,7 @@ const AudioRecorderComponent = React.forwardRef((props, ref) => {
                 handleReset={() => handleReset()}
                 mimeTypeToUseWhenRecording={`audio/webm`} // For specific mimetype.
             />
-            <div>
+            <span style={{display: "flex", flexDirection: "row", border: "3px solid black", justifyItems: "center", justifyContent: "center", height: "50px"}}>
                 <span style={{display: "inner-flex", alignItems: "center", position: "relative", width: "20%", height: "50px"}}>
                     <Select>
                         <SelectTrigger className="SelectTrigger" aria-label="Food">
@@ -214,12 +204,13 @@ const AudioRecorderComponent = React.forwardRef((props, ref) => {
                             </SelectScrollUpButton>
                                 <SelectGroup>
                                     <SelectLabel className="SelectLabel">Europa</SelectLabel>
-                                    <SelectItem value="en">English</SelectItem>
-                                    <SelectItem value="cz">Česky</SelectItem>
-                                    <SelectItem value="cz">Slovensky</SelectItem>
-                                    <SelectItem value="es">Espana</SelectItem>
-                                    <SelectItem value="de">Deutch</SelectItem>
-                                    <SelectItem value="it">Italiano</SelectItem>
+                                    <SelectItem value="English">English</SelectItem>
+                                    <SelectItem value="Czech">Česky</SelectItem>
+                                    <SelectItem value="Czech">Slovensky</SelectItem>
+                                    <SelectItem value="Spanish">Espana</SelectItem>
+                                    <SelectItem value="German">Deutch</SelectItem>
+                                    <SelectItem value="Italian">Italiano</SelectItem>
+                                    <SelectItem value="French">Francais</SelectItem>
                                 </SelectGroup>
                                 <SelectSeparator className="SelectSeparator" />
                             <SelectScrollDownButton className="SelectScrollButton">
@@ -229,9 +220,8 @@ const AudioRecorderComponent = React.forwardRef((props, ref) => {
                 </span>
                 <span style={{display: "inner-flex", alignItems: "center", position: "relative", width: "80%", height: "50px"}}>
                     <input name="langSpeed" step="1" type="range" defaultValue="0" style={{width: "100%", height: "50px"}}/>
-     
                 </span>   
-            </div>
+            </span>
             {rows}
             <div>
                 <button onClick={() => {mergeRecordedFiles() }}>Merge</button>
