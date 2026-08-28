@@ -13,7 +13,9 @@ from app.storage import (
 from app.voice_lines import (
     get_voice_lines_from_frame_config,
     insert_voice_lines_into_frame_config,
+    delete_voice_line_from_frame_config,
     get_voice_lines_sound,
+    delete_voice_lines_sound,
     insert_voice_lines_sound
 )
 load_dotenv()
@@ -64,7 +66,7 @@ def insert_voice_lines_config_for_frame_api(exercise_id, frame_index):
 
 
 # ---------------------------------------------------------------------------
-# GET /voiceLines/sound/exercise/<exercise_id>/frame/<int:frame_index>
+# GET /voiceLines/sound/exercise/<exercise_id>/frame/<int:frame_index>/<file_name>
 # ---------------------------------------------------------------------------
 @voice_lines_bp.route("/sound/exercise/<exercise_id>/frame/<int:frame_index>/<file_name>", methods=["GET"])
 def get_voice_lines_sound_api(exercise_id, frame_index, file_name):
@@ -78,6 +80,24 @@ def get_voice_lines_sound_api(exercise_id, frame_index, file_name):
         return jsonify({"sound": voice_lines_sound_in_base64, "audioFormat": "webm"}), 200
     return jsonify({"error": "No file extracted."}), 400
 
+
+# ---------------------------------------------------------------------------
+# DELETE /voiceLines/sound/exercise/<exercise_id>/frame/<int:frame_index>/<file_name>
+# ---------------------------------------------------------------------------
+@voice_lines_bp.route("/sound/exercise/<exercise_id>/frame/<int:frame_index>/<file_name>", methods=["DELETE"])
+def delete_voice_lines_sound_api(exercise_id, frame_index, file_name):
+    if not exercise_exists(exercise_id):
+        return jsonify({"error": f"Exercise '{exercise_id}' not found"}), 404
+    try:
+        frame_config = get_frame(exercise_id, frame_index)
+    except FileNotFoundError as e:
+        return jsonify({"error": str(e)}), 404
+    if delete_voice_lines_sound(exercise_id, frame_index, file_name):
+        if delete_voice_line_from_frame_config(exercise_id, frame_index, file_name):
+            return jsonify({"result": "OK", "audioFormat": "webm"}), 200
+        return jsonify({"error": "File removed but cannot remove from file config."}), 400
+    return jsonify({"error": "No file extracted."}), 400
+    
 
 # ---------------------------------------------------------------------------
 # POST /voiceLines/sound/exercise/<exercise_id>/frame/<int:frame_index>

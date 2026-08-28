@@ -294,7 +294,7 @@ export function CustomAudioPlayer({url, keyID, index, blob, defaultText,
               disabled={deleting}
               className="w-full flex items-center justify-center gap-1.5 text-[11px] text-gray-400 hover:text-red-500 transition-colors py-1 rounded-md hover:bg-red-50"
               aria-label="Odstrániť hlašku"
-              style={{width: "225px", height: "50px", alignSelf: "center", margin: "10px 8% 10px 25px"}}
+              style={{width: "225px", height: "50px", alignSelf: "center", margin: "1.5rem 8% 10px 25px"}}
             >
             {deleting
               ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -302,7 +302,7 @@ export function CustomAudioPlayer({url, keyID, index, blob, defaultText,
             }
             Odstrániť
           </button>
-        <Button style={{width: "55%", margin: "10px 25px 10px 8%", fontWeight: "bold", color: "white", borderRadius: "25px", fontSize: "large", marginTop: "1.5rem", fontWeight: "bold", height: standardButtonHeight}} onClick={extractFromVideo}>Extrahuj text z audia</Button>
+        <Button style={{width: "55%", margin: "1.5rem 25px 10px 8%", fontWeight: "bold", color: "white", borderRadius: "25px", fontSize: "large", fontWeight: "bold", height: standardButtonHeight}} onClick={extractFromVideo}>Extrahuj text z audia</Button>
       </div>
     </div>
   );
