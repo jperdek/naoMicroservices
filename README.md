@@ -77,13 +77,14 @@
 ## Run
 It is necessary to use only one python from Python 2.7 and 3.xxx as can be seen:  
 
-```cd D:\tpVideoKonverter```
-```"D:\tpVideoKonverter\team-19-social-robot\skeletonFinderAPI\.venv\Scripts\python.exe" D:\tpVideoKonverter\team-19-social-robot\skeletonFinderAPI\server\server.py```
-```"D:\tpVideoKonverter\team-19-social-robot\skeletonFinderAPI\.venv\Scripts\python.exe" "D:\tpVideoKonverter\team-19-social-robot\translator\nao_pose_service.py```
-```"D:\tpVideoKonverter\team-19-social-robot\skeletonFinderAPI\.venv\Scripts\python.exe" "D:\tpVideoKonverter\team-19-social-robot\voiceCommandAPI\server.py"```
-```"D:\tpVideoKonverter\team-19-social-robot\skeletonFinderAPI\.venv\Scripts\python.exe"  D:\tpVideoKonverter\team-19-social-robot\exerciseConfigService\run.py```
-```"D:\tpVideoKonverter\team-19-social-robot\audioToTextConverter\.venv\Scripts\python.exe" "D:\tpVideoKonverter\team-19-social-robot\audioToTextConverter\text_from_audio_extractor_service.py```
-```cd D:\tpVideoKonverter\team-19-social-robot\naoRobotAPI```
-```"C:\Python27\python.exe" D:\tpVideoKonverter\team-19-social-robot\naoRobotAPI\server.py```
+```cd D:\tpVideoKonverter```  
+```"D:\tpVideoKonverter\team-19-social-robot\skeletonFinderAPI\.venv\Scripts\python.exe" D:\tpVideoKonverter\team-19-social-robot\skeletonFinderAPI\server\server.py```  
+```"D:\tpVideoKonverter\team-19-social-robot\skeletonFinderAPI\.venv\Scripts\python.exe" "D:\tpVideoKonverter\team-19-social-robot\translator\nao_pose_service.py```  
+```"D:\tpVideoKonverter\team-19-social-robot\skeletonFinderAPI\.venv\Scripts\python.exe" "D:\tpVideoKonverter\team-19-social-robot\voiceCommandAPI\server.py"```  
+```"D:\tpVideoKonverter\team-19-social-robot\skeletonFinderAPI\.venv\Scripts\python.exe"  D:\tpVideoKonverter\team-19-social-robot\exerciseConfigService\run.py```  
+```"D:\tpVideoKonverter\team-19-social-robot\audioToTextConverter\.venv\Scripts\python.exe" "D:\tpVideoKonverter\team-19-social-robot\audioToTextConverter\text_from_audio_extractor_service.py```  
+```cd D:\tpVideoKonverter\team-19-social-robot\naoRobotAPI```  
+```"C:\Python27\python.exe" D:\tpVideoKonverter\team-19-social-robot\naoRobotAPI\server.py```  
 
-No all microservices all always necessary. Save resources.
+No all microservices all always necessary. Save resources.  
+ 
