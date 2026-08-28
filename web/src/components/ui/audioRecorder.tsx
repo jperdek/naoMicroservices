@@ -196,8 +196,11 @@ const AudioRecorderComponent = React.forwardRef((props, ref) => {
                 handleReset={() => handleReset()}
                 mimeTypeToUseWhenRecording={`audio/webm`} // For specific mimetype.
             />
-            <span style={{display: "flex", flexDirection: "row", border: "3px solid black", justifyItems: "center", justifyContent: "center", height: "50px"}}>
-                <span style={{display: "inner-flex", alignItems: "center", position: "relative", width: "20%", height: "50px"}}>
+            <span style={{display: "flex", flexDirection: "row", justifyItems: "space-between", justifyContent: "space-between", height: "50px", marginBottom: "3rem"}}>
+                
+                <span style={{display: "inner-flex", alignItems: "center", position: "relative", height: "50px"}}>
+                    <p className="text-[15px] font-medium text-gray-500 uppercase tracking-wide" style={{ width: "100%", marginLeft: "10px", marginBottom: "0.5rem" }}>Jazyk</p>
+    
                     <Select>
                         <SelectTrigger className="SelectTrigger" aria-label="Food">
                             <SelectValue placeholder="Select a language" />
@@ -210,7 +213,6 @@ const AudioRecorderComponent = React.forwardRef((props, ref) => {
                                     <SelectLabel className="SelectLabel">Europa</SelectLabel>
                                     <SelectItem value="English">English</SelectItem>
                                     <SelectItem value="Czech">Česky</SelectItem>
-                                    <SelectItem value="Czech">Slovensky</SelectItem>
                                     <SelectItem value="Spanish">Espana</SelectItem>
                                     <SelectItem value="German">Deutch</SelectItem>
                                     <SelectItem value="Italian">Italiano</SelectItem>
@@ -222,14 +224,15 @@ const AudioRecorderComponent = React.forwardRef((props, ref) => {
                         </SelectContent>
                     </Select>
                 </span>
-                <span style={{display: "inner-flex", alignItems: "center", position: "relative", width: "80%", height: "50px"}}>
+                <span style={{alignItems: "center", position: "relative", height: "50px"}}>
+                    <p className="text-[15px] font-medium text-gray-500 uppercase tracking-wide" style={{ width: "100%", marginLeft: "10px", marginBottom: "0.5rem" }}>Rýchlosť reči robota</p>
                     <input name="langSpeed" step="1" type="range" defaultValue="0" style={{width: "100%", height: "50px"}}/>
                 </span>   
             </span>
             {rows}
             { rows.length > 1 &&
             <div>
-                <Button onClick={() => {mergeRecordedFiles() }} style={{width: "80%", margin: "10px 10% 10px 10%", fontWeight: "bold", color: "white", borderRadius: "25px", fontSize: "large", marginTop: "1.5rem", fontWeight: "bold", height: standardButtonHeight}}>Zlúčiť všetky</Button>
+                <Button onClick={() => {mergeRecordedFiles() }} style={{width: "80%", margin: "10px 10% 10px 10%", fontWeight: "bold", color: "white", borderRadius: "25px", fontSize: "large", fontWeight: "bold", height: standardButtonHeight}}>Zlúčiť všetky</Button>
             </div> } 
         </div>
     );

@@ -185,7 +185,7 @@ export function CustomAudioPlayer({url, keyID, index, blob, defaultText,
       </audio>
       <span style={{display: "flex", flexDirection: "row", alignItems: "center", position: "relative", width: "17%", height: "50px"}}>
           <p className="text-[15px] font-medium text-gray-500 uppercase tracking-wide" style={{ display: "inline-block", minWidth: "250px", marginLeft: "10px" }}>Pridať oneskorenie</p>
-          <input value={waitBefore} onChange={e => processWaitBeforeChange(e.target.value)} name="waitBefore" step="1" type="number" defaultValue="0" style={{display: "inline-block", marginTop: "1rem", width: "75px", height: "50px", textAlign: "right"}}/>
+          <input value={waitBefore} onChange={e => processWaitBeforeChange(e.target.value)} name="waitBefore" step="1" type="number" style={{display: "inline-block", marginTop: "1rem", width: "75px", height: "50px", textAlign: "right"}}/>
           <span style={{position: "absolute", top: "22px",  right: "-275px", height: "50px", alignSelf: "center"}}>s</span>
       </span>   
       {/* <div style={{display: "flex", flexDirection: "row", justifyItems: "center", justifyContent: "center", height: "75px"}}>
@@ -203,8 +203,8 @@ export function CustomAudioPlayer({url, keyID, index, blob, defaultText,
               <span style={{position: "absolute", top: "13px",  right: "-5px", height: "50px", alignSelf: "center"}}>s</span>
             </span>
            <span style={{margin: "0 25px 0 25px", alignSelf: "center"}}>
-              <svg version="1.2" width="12.7mm" height="8.89mm" viewBox="0 0 1270 889" preserveAspectRatio="xMidYMid" fill-rule="evenodd" stroke-width="28.222" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" xmlns:ooo="http://xml.openoffice.org/svg/export" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:presentation="http://sun.com/xmlns/staroffice/presentation" xmlns:smil="http://www.w3.org/2001/SMIL20/" xmlns:anim="urn:oasis:names:tc:opendocument:xmlns:animation:1.0" xmlns:svg="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0" xml:space="preserve">
-                <defs class="ClipPathGroup">
+              <svg version="1.2" width="12.7mm" height="8.89mm" viewBox="0 0 1270 889" preserveAspectRatio="xMidYMid" fillRule="evenodd" strokeWidth="28.222" strokeLinejoin="round" xmlns="http://www.w3.org/2000/svg" xmlns:ooo="http://xml.openoffice.org/svg/export" xxmlns:xlink="http://www.w3.org/1999/xlink" xmlns:presentation="http://sun.com/xmlns/staroffice/presentation" xmlns:smil="http://www.w3.org/2001/SMIL20/" xmlns:anim="urn:oasis:names:tc:opendocument:xmlns:animation:1.0" xmlns:svg="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0" xmlSpace="preserve">
+                <defs className="ClipPathGroup">
                   <clipPath id="presentation_clip_path" clipPathUnits="userSpaceOnUse">
                   <rect x="0" y="0" width="1270" height="889"/>
                   </clipPath>
@@ -212,10 +212,10 @@ export function CustomAudioPlayer({url, keyID, index, blob, defaultText,
                   <rect x="1" y="0" width="1268" height="888"/>
                   </clipPath>
                 </defs>
-                <defs class="TextShapeIndex">
+                <defs className="TextShapeIndex">
                   <g ooo:slide="id1" ooo:id-list="id3"/>
                 </defs>
-                <defs class="EmbeddedBulletChars">
+                <defs className="EmbeddedBulletChars">
                   <g id="bullet-char-template-57356" transform="scale(0.00048828125,-0.00048828125)">
                   <path d="M 580,1141 L 1163,571 580,0 -4,571 580,1141 Z"/>
                   </g>
@@ -248,20 +248,20 @@ export function CustomAudioPlayer({url, keyID, index, blob, defaultText,
                   </g>
                 </defs>
                 <g>
-                  <g id="id2" class="Master_Slide">
-                  <g id="bg-id2" class="Background"/>
-                  <g id="bo-id2" class="BackgroundObjects"/>
+                  <g id="id2" className="Master_Slide">
+                  <g id="bg-id2" className="Background"/>
+                  <g id="bo-id2" className="BackgroundObjects"/>
                   </g>
                 </g>
-                <g class="SlideGroup">
+                <g className="SlideGroup">
                   <g>
                   <g id="container-id1">
-                    <g id="id1" class="Slide" clip-path="url(#presentation_clip_path)">
-                    <g class="Page">
-                      <g class="Group">
-                      <g class="com.sun.star.drawing.ClosedBezierShape">
+                    <g id="id1" className="Slide" clipPath="url(#presentation_clip_path)">
+                    <g className="Page">
+                      <g className="Group">
+                      <g className="com.sun.star.drawing.ClosedBezierShape">
                         <g id="id3">
-                        <rect class="BoundingBox" stroke="none" fill="none" x="-1" y="124" width="1273" height="613"/>
+                        <rect className="BoundingBox" stroke="none" fill="none" x="-1" y="124" width="1273" height="613"/>
                         <path fill="rgb(255,51,51)" stroke="none" d="M 1270,430 C 1189,328 1107,226 1026,125 999,159 972,193 945,227 980,271 1015,315 1050,358 700,358 350,358 0,358 0,406 0,454 0,502 350,502 700,502 1050,502 1015,546 981,590 946,634 973,667 1000,701 1027,735 1108,633 1189,531 1270,430 Z "/>
                         </g>
                       </g>
