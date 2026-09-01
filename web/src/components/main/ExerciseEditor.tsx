@@ -117,6 +117,7 @@ export default function ExerciseEditor() {
   const [description, setDescription]   = useState<string | null>(null);
   const [descLoading, setDescLoading]   = useState(false);
   const [editingName, setEditingName]   = useState(false);
+  const [openVoiceLines, setOpenVoiceLines] = useState<number | null>(null)
   // maps frame idx → pose name for frames inserted from pose registry
   const [poseFrameMap, setPoseFrameMap] = useState<Record<number, string>>({});
 
@@ -728,6 +729,8 @@ export default function ExerciseEditor() {
                     isDragOver={false}
                     showStatus={showStatus}
                     draggable
+                    openVoiceLines={openVoiceLines}
+                    setOpenVoiceLines={setOpenVoiceLines}
                     onDragStart={() => drag.onDragStart(i)}
                     onDragEnter={() => {}}
                     onDragEnd={() => { drag.onDragEnd(); setDragOver(null); }}
@@ -839,6 +842,8 @@ function FrameCard({
   deleting,
   showStatus,
   isDragOver,
+  openVoiceLines, 
+  setOpenVoiceLines,
   ...dragProps
 }: FrameCardProps) {
   const imageUrl = `${EDITOR_API}/exercise/${exerciseId}/frame/${frame.idx}/image`;
@@ -854,11 +859,13 @@ function FrameCard({
   const [savingAt, setSavingVoiceLinesAt]  = useState<number | null>(null);
   const [speechLanguage, setSpeechLanguage] = useState<string>("English");
   const [speechSpeed, setSpeechSpeed] = useState<number>(100);
-
+  
   const audioRecorderRef = useRef(null);
   const aggregatedVoiceLinesRef = useRef<HTMLTextAreaElement>(null);
-  let configLoaded = false;
-  let voiceLinesLoaded = false;
+  let [configLoaded, setConfigLoaded] = useState(false);
+  const [voiceLinesLoaded, setVoiceLinesLoaded] = useState(false);
+
+  
   const imgEl = !imgError ? (
     <img src={imageUrl} alt={`Frame ${frame.idx}`} className="w-full h-full object-cover rounded-lg bg-muted" onError={() => setImgError(true)} />
   ) : poseImageUrl && !poseImgError ? (
@@ -885,7 +892,7 @@ function FrameCard({
   useEffect(() => {
     async function loadVoiceLines(overallRecordedMessage) {
       if (!overallRecordedMessage || !configLoaded) {
-       configLoaded = true;
+       setConfigLoaded(true);
         try {
           fetch(`${EDITOR_API}/voiceLines/config/exercise/${exerciseId}/frame/${frame.idx}`, {
             method: "GET",
@@ -897,16 +904,13 @@ function FrameCard({
           })
           .then((data) => {
             if (extractText(data) !== "") {
-              console.log(data["voice_lines_configs"]);
                 for (const [key, value] of Object.entries(data["voice_lines_configs"])) {
                   if (overallRecordedMessage["voice_lines_configs"] === undefined) {
                       overallRecordedMessage["voice_lines_configs"] = {};
                   }
                   overallRecordedMessage["voice_lines_configs"][key] = value;
                 }
-                console.log(overallRecordedMessage);
                 overallRecordedMessage["extractedText"] = extractText(data);
-                console.log(overallRecordedMessage["extractedText"]);
                 onOverallRecordedMessageChange(overallRecordedMessage);
             } 
           })
@@ -924,9 +928,8 @@ function FrameCard({
 
   useEffect(()=>{
     async function fetchAllVoiceLines() {
-
     if (toggleText && !voiceLinesLoaded) {
-      voiceLinesLoaded = true;
+      setVoiceLinesLoaded(true);
       let resultingText = "";
       if (overallRecordedMessage["voice_lines_configs"] !== undefined ) {
         for (const [key, value] of Object.entries(overallRecordedMessage["voice_lines_configs"])) {
@@ -956,8 +959,8 @@ function FrameCard({
       }
       }
     }
-
-     fetchAllVoiceLines(); 
+    
+    fetchAllVoiceLines(); 
   },[toggleText]);
 
   const saveAudioFile = async (audioInBase64, fileNameWithFormat) => {
@@ -1190,12 +1193,20 @@ function FrameCard({
             <div style={{display: "flex"}}>
               <p className="text-[10px] font-medium text-gray-500 uppercase tracking-wide" style={{ flex: "0 0 calc(100% - 70px)", marginLeft: "10px" }}>Record and speech summary</p>
               
-              <Switch.Root onCheckedChange={(e) => { setTextToggle(e);}} style={{width: "50px", marginRight: "10px"}} className="SwitchRoot">
+              <Switch.Root onCheckedChange={(e) => {
+                
+                 setTextToggle(e);
+                 if (!toggleText) { 
+                    setOpenVoiceLines(frame.idx); 
+                 } else { 
+                    setOpenVoiceLines(null); 
+                 }   
+              }} style={{width: "50px", marginRight: "10px"}} className="SwitchRoot">
                   <Switch.Thumb className="SwitchThumb" />
               </Switch.Root>
             </div>
           </div>
-          <div style={{display: (toggleText)? "block": "none", position: "relative"}}>
+          <div style={{display: (openVoiceLines === frame.idx && toggleText)? "block": "none", position: "relative"}}>
               <div style={{position: "absolute"}}>
                 <AudioRecorderComponent ref={audioRecorderRef} speechSpeed={speechSpeed} setSpeechSpeed={setSpeechSpeed} speechLanguage={speechLanguage} setSpeechLanguage={setSpeechLanguage} saveAudioFile={saveAudioFile} overallRecordedMessage={overallRecordedMessage} onOverallRecordedMessageChange={onOverallRecordedMessageChange}/>
               </div>
