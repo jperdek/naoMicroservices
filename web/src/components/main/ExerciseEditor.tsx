@@ -851,6 +851,9 @@ function FrameCard({
   const [naoSaying, setNaoSaying] = useState(false);
   const [overallRecordedMessage, onOverallRecordedMessageChange] = useState({"extractedText": "Nothing so far"});
   const [savingAt, setSavingVoiceLinesAt]  = useState<number | null>(null);
+  const [speechLanguage, setSpeechLanguage] = useState<string>("English");
+  const [speechSpeed, setSpeechSpeed] = useState<number>(100);
+
   const audioRecorderRef = useRef(null);
   const aggregatedVoiceLinesRef = useRef<HTMLTextAreaElement>(null);
   let configLoaded = false;
@@ -1016,6 +1019,8 @@ function FrameCard({
   const testVoiceLines = async () => {
     if (audioRecorderRef.current !== null) {
       const textConfigToBeSaid = audioRecorderRef.current.getTextConfigFromVoiceLinesToBeSaidByRobot();
+      textConfigToBeSaid["lang"] = speechLanguage;
+      textConfigToBeSaid["speed"] = speechSpeed;
       onRobotSay(textConfigToBeSaid);
     } else {
       if (aggregatedVoiceLinesRef === null) { 
@@ -1185,7 +1190,7 @@ function FrameCard({
           </div>
           <div style={{display: (toggleText)? "block": "none", position: "relative"}}>
               <div style={{position: "absolute"}}>
-                <AudioRecorderComponent ref={audioRecorderRef} saveAudioFile={saveAudioFile} overallRecordedMessage={overallRecordedMessage} onOverallRecordedMessageChange={onOverallRecordedMessageChange}/>
+                <AudioRecorderComponent ref={audioRecorderRef} speechSpeed={speechSpeed} setSpeechSpeed={setSpeechSpeed} speechLanguage={speechLanguage} setSpeechLanguage={setSpeechLanguage} saveAudioFile={saveAudioFile} overallRecordedMessage={overallRecordedMessage} onOverallRecordedMessageChange={onOverallRecordedMessageChange}/>
               </div>
           </div>
           <div className="px-3 pb-3">

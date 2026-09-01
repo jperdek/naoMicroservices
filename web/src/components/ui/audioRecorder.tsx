@@ -201,7 +201,7 @@ const AudioRecorderComponent = React.forwardRef((props, ref) => {
                 <span style={{display: "inner-flex", alignItems: "center", position: "relative", height: "50px"}}>
                     <p className="text-[15px] font-medium text-gray-500 uppercase tracking-wide" style={{ width: "100%", marginLeft: "10px", marginBottom: "0.5rem" }}>Jazyk</p>
     
-                    <Select>
+                    <Select defaultValue={props.speechLanguage} onValueChange={(event) => { props.setSpeechLanguage(event); }}>
                         <SelectTrigger className="SelectTrigger" aria-label="Food">
                             <SelectValue placeholder="Select a language" />
                         </SelectTrigger>
@@ -226,13 +226,14 @@ const AudioRecorderComponent = React.forwardRef((props, ref) => {
                 </span>
                 <span style={{alignItems: "center", position: "relative", height: "50px"}}>
                     <p className="text-[15px] font-medium text-gray-500 uppercase tracking-wide" style={{ width: "100%", marginLeft: "10px", marginBottom: "0.5rem" }}>Rýchlosť reči robota</p>
-                    <input name="langSpeed" step="1" type="range" defaultValue="0" style={{width: "100%", height: "50px"}}/>
+                    <input name="langSpeed" step="1" type="range" defaultValue={props.speechSpeed} 
+                    onChange={(event) => {props.setSpeechSpeed(event.target.value); }} style={{width: "100%", height: "50px"}}/>
                 </span>   
             </span>
             {rows}
             { rows.length > 1 &&
             <div>
-                <Button onClick={() => {mergeRecordedFiles() }} style={{width: "80%", margin: "10px 10% 10px 10%", fontWeight: "bold", color: "white", borderRadius: "25px", fontSize: "large", fontWeight: "bold", height: standardButtonHeight}}>Zlúčiť všetky</Button>
+                <Button onClick={() => {mergeRecordedFiles() }} style={{width: "80%", margin: "10px 10% 10px 10%", color: "white", borderRadius: "25px", fontSize: "large", fontWeight: "bold", height: standardButtonHeight}}>Zlúčiť všetky</Button>
             </div> } 
         </div>
     );

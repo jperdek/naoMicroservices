@@ -2,7 +2,7 @@ import { useRef, useState, useEffect, useCallback } from 'react';
 import { audioBufferToWebMBlob } from "./webmAudio";
 import { standardButtonColor, standardButtonHeight, secondaryButtonColor} from "@/components/styles/styles";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import { Trash2, Loader2, Pickaxe } from "lucide-react";
 
 const LOCAL = true; 
 // ── API config ────────────────────────────────────────────────────
@@ -17,7 +17,8 @@ export function CustomAudioPlayer({url, keyID, index, blob, defaultText,
   const [audioPlayer, setAudioPlayer] = useState({"url": url,"blob": blob});
   const [textAreaText, setTextAreaText] = useState(defaultText? defaultText: "Text to be said by NAO. Possibly loaded from video.");
   const [waitBefore, setWaitBefore] = useState(0);
-  const [deleting, setDeleting]   = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
+  const [extracting, setExtracting] = useState<string | null>(null);
 
   useEffect((): string => {
     async function endTime(blob) {
@@ -119,35 +120,47 @@ export function CustomAudioPlayer({url, keyID, index, blob, defaultText,
           });
   }
 
+  
+
   const extractFromVideo = async () => {
       const audioBlob = audioPlayer.blob;
      // const audioFile = await fetch(audioPlayer.url);
       const reader = new FileReader();
       reader.readAsDataURL(audioBlob);
       reader.onloadend = async () => {
-        const audioInBase64 = reader.result.replaceAll("data:audio/*;base64,","");
-        const res = await fetch(`${TO_TEXT_API}/translate/webm`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ "audio_file": audioInBase64, "language": "sk", "model": "large-v1" }),
-        });
-        if (!res.ok) throw new Error(`Upload failed: HTTP ${res.status}`);
-        const data = await res.json();
-        const translation: string = data.translation;
-        setTextAreaText(translation);
+        setExtracting("11");
+        console.log("setting");
+        try {
+            const audioInBase64 = reader.result.replaceAll("data:audio/*;base64,","");
+            const res = await fetch(`${TO_TEXT_API}/translate/webm`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({ "audio_file": audioInBase64, "language": "sk", "model": "large-v1" }),
+            });
+            if (!res.ok) throw new Error(`Upload failed: HTTP ${res.status}`);
+            const data = await res.json();
+            const translation: string = data.translation;
+            setTextAreaText(translation);
 
-        if (overallRecordedMessage["voice_lines_configs"] === undefined) {
-            overallRecordedMessage["voice_lines_configs"] = {};
+            if (overallRecordedMessage["voice_lines_configs"] === undefined) {
+                overallRecordedMessage["voice_lines_configs"] = {};
+            }
+            const fileName = keyID + ".webm";
+            overallRecordedMessage["voice_lines_configs"][(index + "").padStart(3, "0")] = 
+                {"translation": translation, "index": index, "fileName": fileName};
+            saveAudioFile(audioInBase64, fileName);
+            overallRecordedMessage["extractedText"] = translation;
+            onOverallRecordedMessageChange(overallRecordedMessage);
+        } catch (err) {
+          console.log(err);
+          //showStatus("error", err instanceof Error ? err.message : "Odstránenie zlyhalo");
+        } finally {
+          console.log("Done");
+          setExtracting(null);
         }
-        const fileName = keyID + ".webm";
-        overallRecordedMessage["voice_lines_configs"][(index + "").padStart(3, "0")] = 
-            {"translation": translation, "index": index, "fileName": fileName};
-        saveAudioFile(audioInBase64, fileName);
-        overallRecordedMessage["extractedText"] = translation;
-        onOverallRecordedMessageChange(overallRecordedMessage);
-      };   
+      }
   }
 
   // ── delete recorded voice line if saved ──────────────────────────────────────────────
@@ -302,7 +315,12 @@ export function CustomAudioPlayer({url, keyID, index, blob, defaultText,
             }
             Odstrániť
           </button>
-        <Button style={{width: "55%", margin: "1.5rem 25px 10px 8%", fontWeight: "bold", color: "white", borderRadius: "25px", fontSize: "large", fontWeight: "bold", height: standardButtonHeight}} onClick={extractFromVideo}>Extrahuj text z audia</Button>
+        <Button style={{width: "55%", margin: "1.5rem 25px 10px 8%", color: "white", borderRadius: "25px", fontSize: "large", fontWeight: "bold", height: standardButtonHeight}} onClick={extractFromVideo}>
+          {extracting
+              ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              : <Pickaxe className="h-3.5 w-3.5" />
+            }
+        Extrahuj text z audia</Button>
       </div>
     </div>
   );

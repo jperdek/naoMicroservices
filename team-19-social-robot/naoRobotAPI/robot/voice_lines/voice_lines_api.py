@@ -19,6 +19,7 @@ voice_lines_api = Blueprint("voice_lines_api", __name__, template_folder="templa
 def set_pose():
     data = request.get_json(force=True)
     voice_lines_config = data["voice_lines"]
+    print(voice_lines_config)
     set_voice_lines(voice_lines_config)
     return application_json_response({"success": True}, 200)
 

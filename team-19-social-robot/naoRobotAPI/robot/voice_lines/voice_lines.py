@@ -16,16 +16,25 @@ def set_voice_lines(voice_lines_config):
         NAO_PORT = int(os.environ.get("NAO_PORT", 9559))
         g.speech_proxy = ALProxy("ALTextToSpeech", NAO_IP, NAO_PORT)
     if "speed" in voice_lines_config:
-        g.speech_proxy.setParameter("speed", voice_lines_config["speed"])
+        g.speech_proxy.setParameter("speed", int(voice_lines_config["speed"]))
     elif "lang" not in voice_lines_config or voice_lines_config["lang"] == "English":
         g.speech_proxy.setParameter("speed", 80)
     elif voice_lines_config["lang"] == "sk":
         g.speech_proxy.setParameter("speed", 100)
 
-    lang = voice_lines_config["lang"] if "lang" in voice_lines_config else "English" 
-    for _, voice_line_config in voice_lines_config["voice_lines_configs"].items():
-        if "wait" in voice_line_config and voice_line_config["wait"]:
-            time.sleep(voice_line_config["wait"])
-        text = unicode(voice_line_config["translation"]).encode('utf8', 'replace')
-        g.speech_proxy.say(text, lang)
+    lang = voice_lines_config["lang"] if "lang" in voice_lines_config else "English"
+    lang = "English" if not lang else lang
+    if "voice_lines_configs" in voice_lines_config:
+        for _, voice_line_config in voice_lines_config["voice_lines_configs"].items():
+            if "wait" in voice_line_config and voice_line_config["wait"]:
+                time.sleep(voice_line_config["wait"])
+            text = unicode(voice_line_config["translation"]).encode('utf8', 'replace')
+            print(text)
+            try:
+                g.speech_proxy.say("" + text, lang)
+            except:
+                lang = lang.encode('utf8', 'replace')
+                g.speech_proxy.say(voice_line_config["translation"].encode('utf8', 'replace'), lang)
+    else:
+        print("Voice lines are not available in config")
  
