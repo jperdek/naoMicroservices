@@ -849,7 +849,8 @@ function FrameCard({
   const [afterVal, setAfterVal]   = useState("");
   const [toggleText, setTextToggle] = useState(false);
   const [naoSaying, setNaoSaying] = useState(false);
-  const [overallRecordedMessage, onOverallRecordedMessageChange] = useState({"extractedText": "Nothing so far"});
+  const noExtractedText = "Nothing so far";
+  const [overallRecordedMessage, onOverallRecordedMessageChange] = useState({"extractedText": noExtractedText});
   const [savingAt, setSavingVoiceLinesAt]  = useState<number | null>(null);
   const [speechLanguage, setSpeechLanguage] = useState<string>("English");
   const [speechSpeed, setSpeechSpeed] = useState<number>(100);
@@ -880,6 +881,7 @@ function FrameCard({
     return resultingText;
   }
 
+
   useEffect(() => {
     async function loadVoiceLines(overallRecordedMessage) {
       if (!overallRecordedMessage || !configLoaded) {
@@ -895,27 +897,30 @@ function FrameCard({
           })
           .then((data) => {
             if (extractText(data) !== "") {
+              console.log(data["voice_lines_configs"]);
                 for (const [key, value] of Object.entries(data["voice_lines_configs"])) {
                   if (overallRecordedMessage["voice_lines_configs"] === undefined) {
                       overallRecordedMessage["voice_lines_configs"] = {};
                   }
                   overallRecordedMessage["voice_lines_configs"][key] = value;
                 }
+                console.log(overallRecordedMessage);
                 overallRecordedMessage["extractedText"] = extractText(data);
                 console.log(overallRecordedMessage["extractedText"]);
                 onOverallRecordedMessageChange(overallRecordedMessage);
             } 
           })
           .catch((error) => {
+            console.log(error);
           });
         } catch(e) {
+          console.log(e);
         }
       }
     }
+
     loadVoiceLines(overallRecordedMessage);
-  }, [overallRecordedMessage])
-
-
+  }, [overallRecordedMessage]);
 
   useEffect(()=>{
     async function fetchAllVoiceLines() {
@@ -925,8 +930,6 @@ function FrameCard({
       let resultingText = "";
       if (overallRecordedMessage["voice_lines_configs"] !== undefined ) {
         for (const [key, value] of Object.entries(overallRecordedMessage["voice_lines_configs"])) {
-          console.log(key);
-          console.log(value["fileName"]);
           try {
             fetch(`${EDITOR_API}/voiceLines/sound/exercise/${exerciseId}/frame/${frame.idx}/${value["fileName"]}`, {
               method: "GET",
@@ -953,8 +956,9 @@ function FrameCard({
       }
       }
     }
+
      fetchAllVoiceLines(); 
-  },[toggleText]) 
+  },[toggleText]);
 
   const saveAudioFile = async (audioInBase64, fileNameWithFormat) => {
     const res = await fetch(`${EDITOR_API}/voiceLines/sound/exercise/${exerciseId}/frame/${frame.idx}`, {
@@ -1018,7 +1022,10 @@ function FrameCard({
 
   const testVoiceLines = async () => {
     if (audioRecorderRef.current !== null) {
-      const textConfigToBeSaid = audioRecorderRef.current.getTextConfigFromVoiceLinesToBeSaidByRobot();
+      let textConfigToBeSaid = audioRecorderRef.current.getTextConfigFromVoiceLinesToBeSaidByRobot();
+      if (Object.keys(textConfigToBeSaid["voice_lines_configs"]).length === 0 && overallRecordedMessage["extractedText"] !== noExtractedText) {
+        textConfigToBeSaid["voice_lines_configs"] = overallRecordedMessage["voice_lines_configs"];
+      }
       textConfigToBeSaid["lang"] = speechLanguage;
       textConfigToBeSaid["speed"] = speechSpeed;
       onRobotSay(textConfigToBeSaid);

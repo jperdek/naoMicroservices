@@ -29,7 +29,6 @@ def set_voice_lines(voice_lines_config):
             if "wait" in voice_line_config and voice_line_config["wait"]:
                 time.sleep(voice_line_config["wait"])
             text = unicode(voice_line_config["translation"]).encode('utf8', 'replace')
-            print(text)
             try:
                 g.speech_proxy.say("" + text, lang)
             except:
