@@ -1,8 +1,26 @@
 
+# Robot configuration
 
-# Local Run
+## Remote run
+Set NAO_IP in ```./team-19-social-robot/naoRobotAPI/.env``` to robot IP (NAO robot should be on the same Wifi if not then configure it using ethernet cable):
 
-## Python Installation
+```NAO_IP=10.62.44.100```
+```NAO_PORT=9559```
+```HOST_IP=127.0.0.1```
+```HOST_PORT=1234```
+
+
+## Local run (choregraphe)
+Set NAO_IP in ```./team-19-social-robot/naoRobotAPI/.env``` to localhost
+
+```NAO_IP=127.0.0.1```
+```NAO_PORT=9559```
+```HOST_IP=127.0.0.1```
+```HOST_PORT=1234``` 
+
+
+
+# Python Installation
 
 ### Python 2.7 (Windows Installation  NAO Robot API)
 
@@ -74,17 +92,41 @@
 
 
 
-## Run
+# Run
 It is necessary to use only one python from Python 2.7 and 3.xxx as can be seen:  
 
+
+## Microservices  
+
+### Identification of the pose from the image  
 ```cd D:\tpVideoKonverter```  
 ```"D:\tpVideoKonverter\team-19-social-robot\skeletonFinderAPI\.venv\Scripts\python.exe" D:\tpVideoKonverter\team-19-social-robot\skeletonFinderAPI\server\server.py```  
+
+### Managing the information about the pose  
+```cd D:\tpVideoKonverter```  
 ```"D:\tpVideoKonverter\team-19-social-robot\skeletonFinderAPI\.venv\Scripts\python.exe" "D:\tpVideoKonverter\team-19-social-robot\translator\nao_pose_service.py```  
-```"D:\tpVideoKonverter\team-19-social-robot\skeletonFinderAPI\.venv\Scripts\python.exe" "D:\tpVideoKonverter\team-19-social-robot\voiceCommandAPI\server.py"```  
+
+### Managing commands conversion via generative model API (needs subsciption - not necessary)  
+```cd D:\tpVideoKonverter```
+```"D:\tpVideoKonverter\team-19-social-robot\skeletonFinderAPI\.venv\Scripts\python.exe" "D:\tpVideoKonverter\team-19-social-robot\voiceCommandAPI\server.py"```
+
+### Storing data to dedicated space such as disc  
+```cd D:\tpVideoKonverter```
 ```"D:\tpVideoKonverter\team-19-social-robot\skeletonFinderAPI\.venv\Scripts\python.exe"  D:\tpVideoKonverter\team-19-social-robot\exerciseConfigService\run.py```  
+
+### Robust third party service to convert audio and video to text 
+```cd D:\tpVideoKonverter```  
 ```"D:\tpVideoKonverter\team-19-social-robot\audioToTextConverter\.venv\Scripts\python.exe" "D:\tpVideoKonverter\team-19-social-robot\audioToTextConverter\text_from_audio_extractor_service.py```  
+  
+### Frontend - integrating collaboration into one  
 ```cd D:\tpVideoKonverter\team-19-social-robot\naoRobotAPI```  
 ```"C:\Python27\python.exe" D:\tpVideoKonverter\team-19-social-robot\naoRobotAPI\server.py```  
 
-No all microservices all always necessary. Save resources.  
- 
+No all microservices are always necessary. Save resources.  
+
+
+## Dedicated disk location
+Depends on the disk where you run ```D:\tpVideoKonverter\team-19-social-robot\exerciseConfigService```.
+
+Located at: ```/service/exercises``` such as ```D:\service\exercises``` on disk ```D```
+

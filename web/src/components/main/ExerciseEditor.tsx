@@ -980,6 +980,10 @@ function FrameCard({
 
   const onSavingVoiceLines = async (exerciseId: number, frameIdx: number, overallRecordedMessage: any) => {
     setSavingVoiceLinesAt(frameIdx);
+    console.log("saving");
+    console.log(overallRecordedMessage);
+    overallRecordedMessage["lang"] = speechLanguage;
+    overallRecordedMessage["speed"] = speechSpeed;
     try {
       const res = await fetch(`${EDITOR_API}/voiceLines/config/exercise/${exerciseId}/frame/${frameIdx}`, {
         method: "POST",

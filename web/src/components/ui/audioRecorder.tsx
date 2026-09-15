@@ -98,7 +98,8 @@ const AudioRecorderComponent = React.forwardRef((props, ref) => {
         const newElement = {id: playerIdentifier, data:<CustomAudioPlayer
             index={inputList.length}  url={url} keyID={playerIdentifier} key={playerIdentifier} blob={blob} 
             overallRecordedMessage={overallRecordedMessage} defaultText={defaultText}
-            saveAudioFile={saveAudioFile} onOverallRecordedMessageChange={onOverallRecordedMessageChange}/>};
+            saveAudioFile={saveAudioFile} onOverallRecordedMessageChange={onOverallRecordedMessageChange}
+            languageVoice={languageVoice} speedVoice={speedVoice}/>};
 
         setInputList(inputList => [...inputList, newElement]);
         inputList.push(newElement);
@@ -137,7 +138,8 @@ const AudioRecorderComponent = React.forwardRef((props, ref) => {
                             inputElement = {id: playerIdentifier, data:<CustomAudioPlayer url={url} 
                             index={inputList.length} keyID={playerIdentifier} key={playerIdentifier} blob={blob} 
                             overallRecordedMessage={overallRecordedMessage} saveAudioFile={saveAudioFile}
-                            onOverallRecordedMessageChange={onOverallRecordedMessageChange}/>};
+                            onOverallRecordedMessageChange={onOverallRecordedMessageChange}
+                            languageVoice={languageVoice} speedVoice={speedVoice}/>};
 
                             if (inputList.length > 1 && j === inputList.length - 1) {
                                 setInputList(inputList => [...inputList, inputElement]);

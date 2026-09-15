@@ -10,7 +10,8 @@ const TO_TEXT_API = LOCAL? "http://localhost:9901" : "";
 
 
 export function CustomAudioPlayer({url, keyID, index, blob, defaultText,
-                            overallRecordedMessage, onOverallRecordedMessageChange, saveAudioFile}) {
+                            overallRecordedMessage, onOverallRecordedMessageChange, 
+                            saveAudioFile, languageVoice, speedVoice}) {
   const playerRef = useRef<any>(null);
   const audioRef = useRef(null);
   const [duration, setDuration] = useState(0.0);
@@ -128,8 +129,6 @@ export function CustomAudioPlayer({url, keyID, index, blob, defaultText,
       const reader = new FileReader();
       reader.readAsDataURL(audioBlob);
       reader.onloadend = async () => {
-        setExtracting("11");
-        console.log("setting");
         try {
             const audioInBase64 = reader.result.replaceAll("data:audio/*;base64,","");
             const res = await fetch(`${TO_TEXT_API}/translate/webm`, {
@@ -137,7 +136,7 @@ export function CustomAudioPlayer({url, keyID, index, blob, defaultText,
               headers: {
                 "Content-Type": "application/json"
               },
-              body: JSON.stringify({ "audio_file": audioInBase64, "language": "sk", "model": "large-v1" }),
+              body: JSON.stringify({ "audio_file": audioInBase64, "lang": languageVoice, "speed": speedVoice, "model": "large-v1" }),
             });
             if (!res.ok) throw new Error(`Upload failed: HTTP ${res.status}`);
             const data = await res.json();
@@ -150,14 +149,13 @@ export function CustomAudioPlayer({url, keyID, index, blob, defaultText,
             const fileName = keyID + ".webm";
             overallRecordedMessage["voice_lines_configs"][(index + "").padStart(3, "0")] = 
                 {"translation": translation, "index": index, "fileName": fileName};
-            saveAudioFile(audioInBase64, fileName);
+            saveAudioFile(audioInBase64, fileName, languageVoice, speedVoice);
             overallRecordedMessage["extractedText"] = translation;
             onOverallRecordedMessageChange(overallRecordedMessage);
         } catch (err) {
           console.log(err);
           //showStatus("error", err instanceof Error ? err.message : "Odstránenie zlyhalo");
         } finally {
-          console.log("Done");
           setExtracting(null);
         }
       }
