@@ -128,5 +128,7 @@ No all microservices are always necessary. Save resources.
 ## Dedicated disk location
 Depends on the disk where you run ```D:\tpVideoKonverter\team-19-social-robot\exerciseConfigService```.
 
-Located at: ```/service/exercises``` such as ```D:\service\exercises``` on disk ```D```
+Located at: ```/service/exercises``` such as ```D:\service\exercises``` on disk ```D```  
+
+
 
