@@ -30,9 +30,9 @@ const AudioRecorderComponent = React.forwardRef((props, ref) => {
     const onOverallRecordedMessageChange = props.onOverallRecordedMessageChange;
     const saveAudioFile = props.saveAudioFile;
     const [inputList, setInputList] = useState<{id: string, data: any}[]>([]);
-    const [languageVoice, setLanguageVoice] = useState("en");
-    const [speedVoice, setSpeedVoice] = useState(100);
-    
+    const [languageVoice, setLanguageVoice] = useState<string>(props.speechLanguage);
+    const [speedVoice, setSpeedVoice] = useState<number>(props.speechSpeed? <props className="speechSpeed"></props> : 100);
+
 
     function getTextConfigFromVoiceLinesToBeSaidByRobot(): string {
         const finalTextConfig = {};
@@ -185,6 +185,7 @@ const AudioRecorderComponent = React.forwardRef((props, ref) => {
     }
     const rows = [];
     for (let i=0; i<inputList.length; i++) { rows.push(inputList[i].data); }
+
     return (
         <div style={{width: "100%"}}>
             <Recorder
@@ -203,7 +204,7 @@ const AudioRecorderComponent = React.forwardRef((props, ref) => {
                 <span style={{display: "inner-flex", alignItems: "center", position: "relative", height: "50px"}}>
                     <p className="text-[15px] font-medium text-gray-500 uppercase tracking-wide" style={{ width: "100%", marginLeft: "10px", marginBottom: "0.5rem" }}>Jazyk</p>
     
-                    <Select defaultValue={props.speechLanguage} onValueChange={(event) => { props.setSpeechLanguage(event); }}>
+                    <Select value={props.speechLanguage} onValueChange={(event) => { props.setSpeechLanguage(event); }}>
                         <SelectTrigger className="SelectTrigger" aria-label="Food">
                             <SelectValue placeholder="Select a language" />
                         </SelectTrigger>

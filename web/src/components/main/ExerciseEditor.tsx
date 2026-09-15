@@ -910,6 +910,19 @@ function FrameCard({
                   }
                   overallRecordedMessage["voice_lines_configs"][key] = value;
                 }
+                console.log("LODED.........................................");
+                console.log(data);
+                if (data["lang"] !== undefined) {
+                  overallRecordedMessage["lang"] = data["lang"]; 
+                  setSpeechLanguage(data["lang"]);
+                  console.log("SEEEEEEEEEEEET");
+                  console.log(data["lang"]);
+                }
+                if (data["speed"] !== undefined) {
+                  overallRecordedMessage["speed"] = data["speed"]; 
+                   setSpeechSpeed(data["speed"]);
+                }
+
                 overallRecordedMessage["extractedText"] = extractText(data);
                 onOverallRecordedMessageChange(overallRecordedMessage);
             } 
@@ -980,8 +993,6 @@ function FrameCard({
 
   const onSavingVoiceLines = async (exerciseId: number, frameIdx: number, overallRecordedMessage: any) => {
     setSavingVoiceLinesAt(frameIdx);
-    console.log("saving");
-    console.log(overallRecordedMessage);
     overallRecordedMessage["lang"] = speechLanguage;
     overallRecordedMessage["speed"] = speechSpeed;
     try {
