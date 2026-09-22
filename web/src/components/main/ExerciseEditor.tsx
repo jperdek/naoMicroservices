@@ -1237,7 +1237,7 @@ function FrameCard({
           </div>
           <div style={{display: (openVoiceLines === frame.idx && toggleText)? "block": "none", position: "relative"}}>
               <div style={{position: "absolute"}}>
-                <AudioRecorderComponent ref={audioRecorderRef} speechSpeed={speechSpeed} setSpeechSpeed={setSpeechSpeed} speechLanguage={speechLanguage} setSpeechLanguage={setSpeechLanguage} saveAudioFile={saveAudioFile} overallRecordedMessage={overallRecordedMessage} onOverallRecordedMessageChange={onOverallRecordedMessageChange}/>
+                <AudioRecorderComponent ref={audioRecorderRef} speechSpeed={speechSpeed} setSpeechSpeed={setSpeechSpeed} speechLanguage={speechLanguage} setSpeechLanguage={setSpeechLanguage} saveAudioFile={saveAudioFile} overallRecordedMessage={overallRecordedMessage} onOverallRecordedMessageChange={onOverallRecordedMessageChange} aggregatedVoiceLinesRef={aggregatedVoiceLinesRef}/>
               </div>
           </div>
           <div className="px-3 pb-3">

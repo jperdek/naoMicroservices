@@ -29,9 +29,10 @@ const AudioRecorderComponent = React.forwardRef((props, ref) => {
     const overallRecordedMessage = props.overallRecordedMessage;
     const onOverallRecordedMessageChange = props.onOverallRecordedMessageChange;
     const saveAudioFile = props.saveAudioFile;
+    const aggregatedVoiceLinesRef = props.aggregatedVoiceLinesRef;
     const [inputList, setInputList] = useState<{id: string, data: any}[]>([]);
     const [languageVoice, setLanguageVoice] = useState<string>(props.speechLanguage);
-    const [speedVoice, setSpeedVoice] = useState<number>(props.speechSpeed? <props className="speechSpeed"></props> : 100);
+    const [speedVoice, setSpeedVoice] = useState<number>(100);
 
 
     function getTextConfigFromVoiceLinesToBeSaidByRobot(): string {
@@ -99,7 +100,7 @@ const AudioRecorderComponent = React.forwardRef((props, ref) => {
             index={inputList.length}  url={url} keyID={playerIdentifier} key={playerIdentifier} blob={blob} 
             overallRecordedMessage={overallRecordedMessage} defaultText={defaultText}
             saveAudioFile={saveAudioFile} onOverallRecordedMessageChange={onOverallRecordedMessageChange}
-            languageVoice={languageVoice} speedVoice={speedVoice}/>};
+            languageVoice={languageVoice} speedVoice={speedVoice} aggregatedVoiceLinesRef={aggregatedVoiceLinesRef}/>};
 
         setInputList(inputList => [...inputList, newElement]);
         inputList.push(newElement);
@@ -139,7 +140,7 @@ const AudioRecorderComponent = React.forwardRef((props, ref) => {
                             index={inputList.length} keyID={playerIdentifier} key={playerIdentifier} blob={blob} 
                             overallRecordedMessage={overallRecordedMessage} saveAudioFile={saveAudioFile}
                             onOverallRecordedMessageChange={onOverallRecordedMessageChange}
-                            languageVoice={languageVoice} speedVoice={speedVoice}/>};
+                            languageVoice={languageVoice} speedVoice={speedVoice} aggregatedVoiceLinesRef={aggregatedVoiceLinesRef}/>};
 
                             if (inputList.length > 1 && j === inputList.length - 1) {
                                 setInputList(inputList => [...inputList, inputElement]);

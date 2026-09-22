@@ -2,7 +2,7 @@ import { useRef, useState, useEffect, useCallback } from 'react';
 import { audioBufferToWebMBlob } from "./webmAudio";
 import { standardButtonColor, standardButtonHeight, secondaryButtonColor} from "@/components/styles/styles";
 import { Button } from "@/components/ui/button";
-import { Trash2, Loader2, Pickaxe } from "lucide-react";
+import { Trash2, Loader2, Pickaxe, ArrowRight } from "lucide-react";
 
 const LOCAL = true; 
 // ── API config ────────────────────────────────────────────────────
@@ -11,8 +11,9 @@ const TO_TEXT_API = LOCAL? "http://localhost:9901" : "";
 
 export function CustomAudioPlayer({url, keyID, index, blob, defaultText,
                             overallRecordedMessage, onOverallRecordedMessageChange, 
-                            saveAudioFile, languageVoice, speedVoice}) {
+                            saveAudioFile, languageVoice, speedVoice, aggregatedVoiceLinesRef}) {
   const playerRef = useRef<any>(null);
+  const textFromVideoTextareaRef = useRef<any>(null);
   const audioRef = useRef(null);
   const [duration, setDuration] = useState(0.0);
   const [audioPlayer, setAudioPlayer] = useState({"url": url,"blob": blob});
@@ -131,6 +132,7 @@ export function CustomAudioPlayer({url, keyID, index, blob, defaultText,
       reader.onloadend = async () => {
         try {
             const audioInBase64 = reader.result.replaceAll("data:audio/*;base64,","");
+            console.log({ "audio_file": audioInBase64, "lang": languageVoice, "speed": speedVoice, "model": "large-v1" });
             const res = await fetch(`${TO_TEXT_API}/translate/webm`, {
               method: "POST",
               headers: {
@@ -142,6 +144,8 @@ export function CustomAudioPlayer({url, keyID, index, blob, defaultText,
             const data = await res.json();
             const translation: string = data.translation;
             setTextAreaText(translation);
+            textFromVideoTextareaRef.current.value = translation;
+            console.log(translation);
 
             if (overallRecordedMessage["voice_lines_configs"] === undefined) {
                 overallRecordedMessage["voice_lines_configs"] = {};
@@ -151,6 +155,7 @@ export function CustomAudioPlayer({url, keyID, index, blob, defaultText,
                 {"translation": translation, "index": index, "fileName": fileName};
             saveAudioFile(audioInBase64, fileName, languageVoice, speedVoice);
             overallRecordedMessage["extractedText"] = translation;
+            
             onOverallRecordedMessageChange(overallRecordedMessage);
         } catch (err) {
           console.log(err);
@@ -161,10 +166,14 @@ export function CustomAudioPlayer({url, keyID, index, blob, defaultText,
       }
   }
 
+  const extendValueFromTextAreas = () => {
+    aggregatedVoiceLinesRef.current.value += textFromVideoTextareaRef.current.value;
+  }
+
   // ── delete recorded voice line if saved ──────────────────────────────────────────────
   // DELETE /exercise/<id>/frame/<idx>
   const onDelete = useCallback(async () => {
-     if (!audioRef) return;
+    if (!audioRef) return;
     audioRef.current.remove();
     if (!keyID) return;
     setDeleting(frameIdx);
@@ -296,7 +305,7 @@ export function CustomAudioPlayer({url, keyID, index, blob, defaultText,
         
       </form>
       <p className="text-[15px] font-medium text-gray-500 uppercase tracking-wide" style={{ flex: "0 0 calc(100% - 70px)", marginLeft: "10px", marginBottom: "0.5rem" }}>Konverzia zvuku na text:</p>
-      <textarea style={{width: "100%", height: "100px", border: "1px solid black", borderRadius: "25px", padding: "30px 30px 30px 30px"}} name="textFromVideo"  onChange={e => { 
+      <textarea ref={textFromVideoTextareaRef} style={{width: "100%", height: "100px", border: "1px solid black", borderRadius: "25px", padding: "30px 30px 30px 30px"}} name="textFromVideo"  onChange={e => { 
         setTextAreaText(e.target.value); return e.target.value;
       }}>
       {textAreaText}
@@ -315,12 +324,15 @@ export function CustomAudioPlayer({url, keyID, index, blob, defaultText,
             }
             Odstrániť
           </button>
-        <Button style={{width: "55%", margin: "1.5rem 25px 10px 8%", color: "white", borderRadius: "25px", fontSize: "large", fontWeight: "bold", height: standardButtonHeight}} onClick={extractFromVideo}>
+        <Button style={{width: "55%", margin: "1.5rem 10px 10px 10px", color: "white", borderRadius: "25px", fontSize: "large", fontWeight: "bold", height: standardButtonHeight}} onClick={extractFromVideo}>
           {extracting
               ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
               : <Pickaxe className="h-3.5 w-3.5" />
             }
         Extrahuj text z audia</Button>
+        <Button style={{width: "15%", margin: "1.5rem 25px 10px 2%", color: "white", borderRadius: "25px", fontSize: "large", fontWeight: "bold", height: standardButtonHeight}} onClick={extendValueFromTextAreas}>
+         <ArrowRight className="h-3.5 w-3.5" /> 
+        Doplň</Button>
       </div>
     </div>
   );
