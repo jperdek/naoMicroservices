@@ -296,8 +296,10 @@ export function CustomAudioPlayer({url, keyID, index, blob, defaultText,
         
       </form>
       <p className="text-[15px] font-medium text-gray-500 uppercase tracking-wide" style={{ flex: "0 0 calc(100% - 70px)", marginLeft: "10px", marginBottom: "0.5rem" }}>Konverzia zvuku na text:</p>
-      <textarea style={{width: "100%", height: "100px", border: "1px solid black", borderRadius: "25px", padding: "30px 30px 30px 30px"}} name="textFromVideo" value={textAreaText} onChange={e => {}}>
-  
+      <textarea style={{width: "100%", height: "100px", border: "1px solid black", borderRadius: "25px", padding: "30px 30px 30px 30px"}} name="textFromVideo"  onChange={e => { 
+        setTextAreaText(e.target.value); return e.target.value;
+      }}>
+      {textAreaText}
       </textarea>
       <div style={{display: "flex", justifyContent: "space-between"}}>
             <button

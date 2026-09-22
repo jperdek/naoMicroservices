@@ -915,8 +915,6 @@ function FrameCard({
                 if (data["lang"] !== undefined) {
                   overallRecordedMessage["lang"] = data["lang"]; 
                   setSpeechLanguage(data["lang"]);
-                  console.log("SEEEEEEEEEEEET");
-                  console.log(data["lang"]);
                 }
                 if (data["speed"] !== undefined) {
                   overallRecordedMessage["speed"] = data["speed"]; 
@@ -1038,8 +1036,23 @@ function FrameCard({
     }
 
 
+    
   const testVoiceLines = async () => {
     if (audioRecorderRef.current !== null) {
+      console.log(aggregatedVoiceLinesRef.current);
+      let textFromTextArea = aggregatedVoiceLinesRef.current.value;
+      
+      console.log(textFromTextArea);
+      if (textFromTextArea !== "Nothing so far") {
+          const textConfigToBeSaid = {
+            "voice_lines_configs": {"entire": {"translation": textFromTextArea}},
+            "lang": speechLanguage,
+            "speed": speechSpeed
+          }
+          onRobotSay(textConfigToBeSaid);
+          return;
+      }
+
       let textConfigToBeSaid = audioRecorderRef.current.getTextConfigFromVoiceLinesToBeSaidByRobot();
       if (Object.keys(textConfigToBeSaid["voice_lines_configs"]).length === 0 && overallRecordedMessage["extractedText"] !== noExtractedText) {
         textConfigToBeSaid["voice_lines_configs"] = overallRecordedMessage["voice_lines_configs"];
@@ -1176,7 +1189,8 @@ function FrameCard({
               <p className="text-[10px] font-medium text-gray-500 uppercase tracking-wide" style={{ flex: "0 0 calc(100% - 70px)", marginLeft: "10px" }}>What NAO says</p>
               <textarea ref={aggregatedVoiceLinesRef} style={{width: "100%", height: "100px", border: "1px solid black", borderRadius: "25px",
                  padding: "30px 30px 30px 30px"}} name="textFromVideo" 
-                 value={extractText(overallRecordedMessage) === ""?  overallRecordedMessage["extractedText"] : extractText(overallRecordedMessage)} onChange={(e) => {console.log(e)}} readOnly>
+                 onChange={(e) => {overallRecordedMessage["extractedText"] = e.target.value; onOverallRecordedMessageChange(overallRecordedMessage); }}>
+                  {extractText(overallRecordedMessage) === ""?  overallRecordedMessage["extractedText"] : extractText(overallRecordedMessage)}
               </textarea>
               <div className="flex items-center gap-2" style={{"margin": "10px 10px 10px 10px"}}>
                 <button
