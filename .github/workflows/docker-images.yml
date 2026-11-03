@@ -4,7 +4,7 @@ name: Docker images
 on:
   pull_request:          
   push:
-    branches: [master]   
+    branches: [master, SCRUM-55-docker-images-ci] #temporary branch for testing docker images ci   
   workflow_dispatch:     
 
 jobs:
