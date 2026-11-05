@@ -1,8 +1,11 @@
 import json, urllib.request, urllib.parse
 import mimetypes, uuid
 
-frames = json.load(open("frames.json"))
-video_bytes = open("video_2.mp4", "rb").read()
+sample_video = "../samples/input/video_2.mp4"
+sample_frames = "../samples/processed/frames.json"
+
+frames = json.load(open(sample_frames))
+video_bytes = open(sample_video, "rb").read()
 
 # Build multipart/form-data manually
 boundary = uuid.uuid4().hex
@@ -25,7 +28,7 @@ body = (
     field("name", "Video 2 Exercise") +
     field("pose_engine", "mediapipe") +
     field("frames", json.dumps(frames)) +
-    file_field("media", "video_2.mp4", video_bytes) +
+    file_field("media", sample_video, video_bytes) +
     f'--{boundary}--\r\n'.encode()
 )
 
