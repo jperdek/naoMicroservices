@@ -1,3 +1,34 @@
+# Repository Stucture
+
+```
+naoMicroservices/
+├── docs/                           # Documentation and setup guides
+├── k8s/                            # Kubernetes manifests
+├── samples/
+│   ├── input/                      # Input files (audio, video, images)
+│   │   ├── images/
+│   │   └── videos/
+│   ├── processed/                  # Processed data and extracted frames
+│   └── exercises/                  # Example exercises
+├── scripts/                        # Utility and helper scripts
+├── services/                       # Backend microservices
+│   ├── audioToTextConverter/
+│   ├── exerciseConfigService/
+│   ├── naoRobotAPI/
+│   ├── skeletonFinderAPI/
+│   ├── translator/
+│   ├── voiceCommandAPI/
+│   └── ...
+├── web/                            # Web application
+├── .env.example
+├── .gitignore
+├── Makefile
+├── README.md
+├── docker-compose.dev.yml
+├── docker-compose.build.yml
+└── docker-compose.env
+```
+
 # Docker compose orchestration (without command API connected to LLM)
 
  - create .env:  
