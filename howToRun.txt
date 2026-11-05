@@ -1,5 +1,5 @@
 PYTHON 2.7
-cd D:\tpVideoKonverter\team-19-social-robot\naoRobotAPI
+cd D:\tpVideoKonverter\services\naoRobotAPI
 
 "C:\Python27\python.exe" -m pip install ./compatDep/qi-1.8.3-cp27-none-win_amd64.whl
 "C:\Python27\python.exe" -m pip install ./compatDep/almath-1.6.8-cp27-none-win_amd64.whl
@@ -45,22 +45,22 @@ VIDEO SERVICE -
 "./.venv/Scripts/python.exe" -m pip install -r requirements.tx
 
 TRANSLATOR
-cd D:\tpVideoKonverter\team-19-social-robot\translator
-"D:/tpVideoKonverter/team-19-social-robot/skeletonFinderAPI/.venv/Scripts/python.exe" nao_pose_service.py
+cd D:\tpVideoKonverter\services\translator
+"D:/tpVideoKonverter/services/skeletonFinderAPI/.venv/Scripts/python.exe" nao_pose_service.py
 
 
 POSE SERVICE
-cd D:\tpVideoKonverter\team-19-social-robot\translator
-"D:/tpVideoKonverter/team-19-social-robot/skeletonFinderAPI/.venv/Scripts/python.exe" D:\tpVideoKonverter\team-19-social-robot\skeletonFinderAPI\server\server.py
+cd D:\tpVideoKonverter\services\translator
+"D:/tpVideoKonverter/services/skeletonFinderAPI/.venv/Scripts/python.exe" D:\tpVideoKonverter\services\skeletonFinderAPI\server\server.py
 
 BASE APP
-"C:\Python27\python.exe" D:\tpVideoKonverter\team-19-social-robot\naoRobotAPI\server.py
+"C:\Python27\python.exe" D:\tpVideoKonverter\services\naoRobotAPI\server.py
 
-cd D:\tpVideoKonverter\team-19-social-robot\exerciseConfigService
-"D:/tpVideoKonverter/team-19-social-robot/skeletonFinderAPI/.venv/Scripts/python.exe" D:\tpVideoKonverter\team-19-social-robot\exerciseConfigService\run.py
+cd D:\tpVideoKonverter\services\exerciseConfigService
+"D:/tpVideoKonverter/services/skeletonFinderAPI/.venv/Scripts/python.exe" D:\tpVideoKonverter\services\exerciseConfigService\run.py
 
-cd D:\tpVideoKonverter\team-19-social-robot\voiceCommandAPI
-"D:/tpVideoKonverter/team-19-social-robot/skeletonFinderAPI/.venv/Scripts/python.exe" D:\tpVideoKonverter\team-19-social-robot\voiceCommandAPI\server.py
+cd D:\tpVideoKonverter\services\voiceCommandAPI
+"D:/tpVideoKonverter/services/skeletonFinderAPI/.venv/Scripts/python.exe" D:\tpVideoKonverter\services\voiceCommandAPI\server.py
 
 FRONTEND
 cd D:\tpVideoKonverter\web
