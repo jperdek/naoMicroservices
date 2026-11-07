@@ -1,3 +1,34 @@
+# Repository Stucture
+
+```
+naoMicroservices/
+├── docs/                           # Documentation and setup guides
+├── k8s/                            # Kubernetes manifests
+├── samples/
+│   ├── input/                      # Input files (audio, video, images)
+│   │   ├── images/
+│   │   └── videos/
+│   ├── processed/                  # Processed data and extracted frames
+│   └── exercises/                  # Example exercises
+├── scripts/                        # Utility and helper scripts
+├── services/                       # Backend microservices
+│   ├── audioToTextConverter/
+│   ├── exerciseConfigService/
+│   ├── naoRobotAPI/
+│   ├── skeletonFinderAPI/
+│   ├── translator/
+│   ├── voiceCommandAPI/
+│   └── ...
+├── web/                            # Web application
+├── .env.example
+├── .gitignore
+├── Makefile
+├── README.md
+├── docker-compose.dev.yml
+├── docker-compose.build.yml
+└── docker-compose.env
+```
+
 # Docker compose orchestration (without command API connected to LLM)
 
  - create .env:  
@@ -19,7 +50,7 @@
 
 # Robot configuration
 
-Set NAO_IP and NAO_PORT in ```./.env``` (without Docker in ```./team-19-social-robot/naoRobotAPI/.env```).
+Set NAO_IP and NAO_PORT in ```./.env``` (without Docker in ```./services/naoRobotAPI/.env```).
 
 Real robot:
 
@@ -89,7 +120,7 @@ Apply changes:
 
 - 7. Run microservice to command NAO:  
 
-```"C:\Python27\python.exe" D:\tpVideoKonverter\team-19-social-robot\naoRobotAPI\server.py```  
+```"C:\Python27\python.exe" D:\tpVideoKonverter\services\naoRobotAPI\server.py```  
 
 
 
@@ -100,17 +131,17 @@ Apply changes:
 - 3. Create Venv or run it globally  
 - 4. Move to skeletonFinderAPI directory:  
 
-    ```D:\tpVideoKonverter\team-19-social-robot\skeletonFinderAPI```  
+    ```D:\tpVideoKonverter\services\skeletonFinderAPI```  
 
 
 - 5. Install dependencies:  
 
-    ```"D:\tpVideoKonverter\team-19-social-robot\skeletonFinderAPI\.venv\Scripts\python.exe" -m pip install -r requirements.txt```  
+    ```"D:\tpVideoKonverter\services\skeletonFinderAPI\.venv\Scripts\python.exe" -m pip install -r requirements.txt```  
 
 
 - 6. Run:  
 
-    ```"D:\tpVideoKonverter\team-19-social-robot\skeletonFinderAPI\.venv\Scripts\python.exe" D:\tpVideoKonverter\team-19-social-robot\skeletonFinderAPI\server\server.py```  
+    ```"D:\tpVideoKonverter\services\skeletonFinderAPI\.venv\Scripts\python.exe" D:\tpVideoKonverter\services\skeletonFinderAPI\server\server.py```  
 
 
 
@@ -123,33 +154,33 @@ It is necessary to use only one python from Python 2.7 and 3.xxx as can be seen:
 
 ### Identification of the pose from the image  
 ```cd D:\tpVideoKonverter```  
-```"D:\tpVideoKonverter\team-19-social-robot\skeletonFinderAPI\.venv\Scripts\python.exe" D:\tpVideoKonverter\team-19-social-robot\skeletonFinderAPI\server\server.py```  
+```"D:\tpVideoKonverter\services\skeletonFinderAPI\.venv\Scripts\python.exe" D:\tpVideoKonverter\services\skeletonFinderAPI\server\server.py```  
 
 ### Managing the information about the pose  
 ```cd D:\tpVideoKonverter```  
-```"D:\tpVideoKonverter\team-19-social-robot\skeletonFinderAPI\.venv\Scripts\python.exe" "D:\tpVideoKonverter\team-19-social-robot\translator\nao_pose_service.py```  
+```"D:\tpVideoKonverter\services\skeletonFinderAPI\.venv\Scripts\python.exe" "D:\tpVideoKonverter\services\translator\nao_pose_service.py```  
 
 ### Managing commands conversion via generative model API (needs subsciption - not necessary)  
 ```cd D:\tpVideoKonverter```
-```"D:\tpVideoKonverter\team-19-social-robot\skeletonFinderAPI\.venv\Scripts\python.exe" "D:\tpVideoKonverter\team-19-social-robot\voiceCommandAPI\server.py"```
+```"D:\tpVideoKonverter\services\skeletonFinderAPI\.venv\Scripts\python.exe" "D:\tpVideoKonverter\services\voiceCommandAPI\server.py"```
 
 ### Storing data to dedicated space such as disc  
 ```cd D:\tpVideoKonverter```
-```"D:\tpVideoKonverter\team-19-social-robot\skeletonFinderAPI\.venv\Scripts\python.exe"  D:\tpVideoKonverter\team-19-social-robot\exerciseConfigService\run.py```  
+```"D:\tpVideoKonverter\services\skeletonFinderAPI\.venv\Scripts\python.exe"  D:\tpVideoKonverter\services\exerciseConfigService\run.py```  
 
 ### Robust third party service to convert audio and video to text 
 ```cd D:\tpVideoKonverter```  
-```"D:\tpVideoKonverter\team-19-social-robot\audioToTextConverter\.venv\Scripts\python.exe" "D:\tpVideoKonverter\team-19-social-robot\audioToTextConverter\text_from_audio_extractor_service.py```  
+```"D:\tpVideoKonverter\services\audioToTextConverter\.venv\Scripts\python.exe" "D:\tpVideoKonverter\services\audioToTextConverter\text_from_audio_extractor_service.py```  
   
 ### Frontend - integrating collaboration into one  
-```cd D:\tpVideoKonverter\team-19-social-robot\naoRobotAPI```  
-```"C:\Python27\python.exe" D:\tpVideoKonverter\team-19-social-robot\naoRobotAPI\server.py```  
+```cd D:\tpVideoKonverter\services\naoRobotAPI```  
+```"C:\Python27\python.exe" D:\tpVideoKonverter\services\naoRobotAPI\server.py```  
 
 No all microservices are always necessary. Save resources.  
 
 
 ## Dedicated disk location
-Depends on the disk where you run ```D:\tpVideoKonverter\team-19-social-robot\exerciseConfigService```.
+Depends on the disk where you run ```D:\tpVideoKonverter\services\exerciseConfigService```.
 
 Located at: ```/service/exercises``` such as ```D:\service\exercises``` on disk ```D```  
 
