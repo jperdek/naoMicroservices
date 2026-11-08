@@ -7,30 +7,30 @@ services:
 
   nao-robot-api:
     build:
-      context: ./team-19-social-robot/naoRobotAPI
+      context: ./services/naoRobotAPI
       dockerfile: Dockerfile
     image: ${REGISTRY:-jperdek}/nao-robot-api:${TAG:-latest}
 
   skeleton-finder-api:
     build:
-      context: ./team-19-social-robot/skeletonFinderAPI
+      context: ./services/skeletonFinderAPI
       dockerfile: Dockerfile
     image: ${REGISTRY:-jperdek}/skeleton-finder-api:${TAG:-latest}
 
   translator:
     build:
-      context: ./team-19-social-robot/translator
+      context: ./services/translator
       dockerfile: Dockerfile
     image: ${REGISTRY:-jperdek}/translator:${TAG:-latest}
 
   voice-command-api:
     build:
-      context: ./team-19-social-robot/voiceCommandAPI
+      context: ./services/voiceCommandAPI
       dockerfile: Dockerfile
     image: ${REGISTRY:-jperdek}/voice-command-api:${TAG:-latest}
 
   exercise-config-service:
     build:
-      context: ./team-19-social-robot/exerciseConfigService
+      context: ./services/exerciseConfigService
       dockerfile: Dockerfile
     image: ${REGISTRY:-jperdek}/exercise-config-service:${TAG:-latest}
