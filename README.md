@@ -1,10 +1,15 @@
 # Docker compose orchestration (without command API connected to LLM)
 
+Docker images of all services are built by GitHub Actions and published to
+GitHub Container Registry (`ghcr.io/team26fiitstu`) on every merge to `master`.
+Each image is tagged with `latest` and `sha-<commit>`. Pull requests only build
+the images to check that they still build; nothing is published.
+
  - create .env:  
 
 ```cp .env.example .env```  
 
- - pull:
+ - pull prebuilt images:
 
 ``` docker compose -f docker-compose.dev.yml pull```
 
@@ -12,9 +17,11 @@
 
 ```docker compose -f docker-compose.dev.yml up```  
 
- - [ALTERNATIVE] build and run:  
+ - [ALTERNATIVE] build locally and run:  
 
 ```docker compose -f docker-compose.dev.yml up --build```  
+
+To run a specific version, set `TAG=sha-<commit>` in `.env`.
 
 
 # Robot configuration
