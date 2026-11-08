@@ -3,18 +3,18 @@ name: Docker images
 on:
   pull_request:
   push:
-    branches: [master, SCRUM-55-docker-images-ci]   # temporary branch for testing docker images CI
+    branches: [master]
   workflow_dispatch:
 
 jobs:
   build:
     name: build (${{ matrix.image }})
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     permissions:
       contents: read
       packages: write
-      pull-requests: read   
+      pull-requests: read 
 
     strategy:
       fail-fast: false
@@ -40,6 +40,7 @@ jobs:
 
       
       - id: filter
+        if: github.event_name != 'workflow_dispatch'
         uses: dorny/paths-filter@v3
         with:
           filters: |
