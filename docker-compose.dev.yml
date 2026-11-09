@@ -105,8 +105,6 @@ services:
       NAO_SET_POSE_URL: http://naorobotapi:5000/setting_pose/setPose
     depends_on:
       - naorobotapi
-    volumes:
-      - ./services/voiceCommandAPI:/app
     networks:
       - appnet
 
